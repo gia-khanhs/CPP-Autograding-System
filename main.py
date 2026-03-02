@@ -28,7 +28,7 @@ prompt = """Problem: Calculate the sum of two numbers.
            #inlcude <bits/stdc++.h>
            using namespace std; //DUCK
            int main{
-            int a, b;
+            int a, c;
             cin >> a >> b;
             cout << a - b;
             return 0;
