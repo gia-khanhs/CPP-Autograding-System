@@ -3,6 +3,12 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# vscode settings
+.vscode/
+
+# hide api key
+config/apikey.py
+
 # C extensions
 *.so
 
