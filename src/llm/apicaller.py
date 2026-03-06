@@ -8,7 +8,7 @@ from google.genai.types import GenerateContentConfigDict
 from config.apikey import GEMINI_API_KEY
 
 class LLMCaller:
-    def __init__(self, api_key: str = GEMINI_API_KEY, model: str = 'gemma-3-27b-it') -> None:
+    def __init__(self, model: str = 'gemma-3-27b-it', api_key: str = GEMINI_API_KEY) -> None:
         self.api_key = api_key
 
         self.client = genai.Client(api_key=self.api_key)
@@ -29,7 +29,7 @@ class CodeCorrector:
 
         self.system_instruction = """*You are a code correction system for university students.\n
                                     Goal:
-                                    - Correct the provided code so it satisfies the problem requirements.\n
+                                    - Correct the provided C++ code files so it satisfies the problem requirements.\n
                                     Rules:
                                     - Apply the minimum necessary changes.
                                     - Preserve the original structure, formatting, and logic whenever possible.
@@ -38,10 +38,11 @@ class CodeCorrector:
                                     - Only modify lines required to make the solution correct.
                                     - If the code is already correct, output it unchanged.\n
                                     Output rules:
-                                    - First identify incorrect lines internally, then output corrected code only.
+                                    - First try to understand the idea of the code first, then identify incorrect lines internally. Finally, output the corrected code only.
                                     - Do not include explanations.
                                     - Do not include comments unless they already exist in the original code.
                                     - Do not reformat the code.
+                                    - If the code makes no sense at all (the logic is not relevant to the problem), return nothing.
                                     * The problem and code is provided below"""
 
         self.config: GenerateContentConfigDict  = {
@@ -51,7 +52,7 @@ class CodeCorrector:
                                                     "top_k": 1,
                                                     "max_output_tokens": 4096,
                                                     "presence_penalty": 0.0,
-                                                    "frequency_penalty": 0.0
+                                                    "frequency_penalty": 0.0,
                                                 }
         
     def correct(self, prompt: str):
