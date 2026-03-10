@@ -9,7 +9,7 @@ date: 2026-03-07
 **Date:** March 7, 2026
 
 ## Important Notes
-For the upcoming project on the automated grading of coding assignments, **Gemma 3 27B** (accessed via the Google AI Studio API) will be used as the main LLM. Based on practical availability and cost constraints, this model appears to be the most suitable option for the project.
+For the upcoming project on the automated grading of coding assignments, **GPT-oss 120B** (accessed via the Google AI Studio API) will be used as the main LLM. Based on practical availability and cost constraints, this model appears to be the most suitable option for the project.
 
 
 ## Contents
@@ -51,7 +51,7 @@ The detailed prompt given to the model at each step is as follows:
 
 In the paper introducing the StepGrade framework, the approach achieved a Mean Absolute Error (MAE) of around 4.0% to 6.2% for each grading rubric relative to human grading on 30 Python programming assignments.
 
-Overall, by utilising CoT and prompt chaining, the framework achieved reasonably accurate grading results compared to human. However, this paper was examining the framework using GPT-4, a large model, which will definitely not be available for the project. This indicates that with the currently available Gemma 3 27B API, the same workflow is likely to yields worse results.
+Overall, by utilising CoT and prompt chaining, the framework achieved reasonably accurate grading results compared to human. However, this paper was examining the framework using GPT-4, a large model, which will definitely not be available for the project. This indicates that with the currently available GPT-oss 120B API, the same workflow may yields worse results.
 
 
 ### 2.2 CodEv - CoT and LLM Ensemble (Intra-model Ensemble)
@@ -82,7 +82,7 @@ For larger models, the final score MAE relative to human scoring (around 6.5%) w
 </div>
 <br>
 
-Overall, for larger models, CodEv performed reasonably well despite its added complexity, although its reported MAE was slightly worse than that of StepGrade. In contrast, the smaller models performed substantially worse. This is an important consideration for the upcoming project, since the use of Gemma 3 27B may place the system closer to a constrained setting than to the high-performance setting used in StepGrade. As a results, the project may produce a higher MAE than systems built on larger models using either StepGrade or CodEv framework (to be verified).
+Overall, for larger models, CodEv performed reasonably well despite its added complexity, although its reported MAE was slightly worse than that of StepGrade. In contrast, the smaller models performed substantially worse. This is an important consideration for the upcoming project, since the use of Groq Compound may place the system closer to a constrained setting than to the high-performance setting used in StepGrade. As a results, the project may produce a higher MAE than systems built on larger models using either StepGrade or CodEv framework (to be verified).
 
 
 ## 2.3 A Combination of Unit Testing, LLM and Machine Learning
@@ -129,9 +129,7 @@ By extracting features from the LLM-corrected code relative to the original subm
 <br>
 
 Overall, although this framework is substantially more complex than the previous two, it achieves the best performance. Its final-grade MAE of 4.43% is lower than the roughly 5% MAE reported for each grading rubric in StepGrade, which may accumulate in the final score, and the 6.5% MAE reported for CodEv, which may lead to worse performance if each rubric were weighted equally in the final grade. Moreover, by using machine learning, this framework implicitly captures how educators grade code, rather than relying on detailed prompts and an explicitly defined grading procedure.
-
-For these reasons, this may be the best approach for the project. However, several limitations must still be considered. First, the project dataset does not include unit tests, and automating their generation using LLM may be difficult with Gemma 3 27B. As a result, the tests may need to be created manually or the unit-testing step may have to be removed entirely. Another important consideration is whether the coding capability of Gemma 3 27B is sufficient for this approach to work effectively.
-
+For these reasons, this may be the best approach for the project.
 
 ## References
 [1] M. Akyash, K. Z. Azar, and H. Mardani Kamali, "StepGrade: Grading Programming Assignments with Context-Aware LLMs," in 2025 IEEE Integrated STEM Education Conference (ISEC), 2025, pp. 1–6, doi: 10.1109/ISEC64801.2025.11147374.
