@@ -4,4 +4,7 @@ clear_logs()
 from src.data.ingestion import CourseLoader, WeekLoader
 from config.paths import RAW_DATA_DIR
 
-w01 = WeekLoader(RAW_DATA_DIR / "Week01").load()
+CS163 = CourseLoader(RAW_DATA_DIR).load()
+
+for week in CS163.weeks:
+    print(week.problem_set.pdf_path)

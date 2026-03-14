@@ -1,14 +1,12 @@
 from pathlib import Path
 from typing import Optional, cast
-from os import PathLike
 
 
 import pymupdf
 import pymupdf4llm
 
 
-from config.paths import RAW_DATA_DIR, ITERIM_DATA_DIR
-from config.paths import EXTRACTED_SUBMISSION_FOLDER
+from config.paths import RAW_DATA_DIR
 
 from ..misc.logger import logged, write_log
 from ..misc.path import get_files_of_type, get_subfolders
@@ -18,7 +16,12 @@ from ..misc.zip_helper import ZipExtractor
 from .structures import Course, Week, ProblemSet, Submission
 
 
-class ProblemSetLoader:
+class Loader[T]:
+    def load(self) -> T:
+        ...
+
+
+class ProblemSetLoader(Loader[ProblemSet]):
     def __init__(self, folder_path: Path) -> None:
         self.folder_path = folder_path
 
@@ -34,7 +37,7 @@ class ProblemSetLoader:
         return ProblemSet(pdf_path, text_content)
 
 
-class SubmissionLoader:
+class SubmissionLoader(Loader[list[Submission]]):
     def __init__(self, folder_path) -> None:
         self.folder_path = folder_path
 
@@ -61,7 +64,7 @@ class SubmissionLoader:
         return submissions
 
 
-class WeekLoader:
+class WeekLoader(Loader[Week]):
     def __init__(self, folder_path: Path) -> None:
         self.folder_path = folder_path
 
@@ -72,7 +75,7 @@ class WeekLoader:
         return Week(self.folder_path, problem_set, submissions)
 
 
-class CourseLoader:
+class CourseLoader(Loader[Course]):
     def __init__(self, folder_path: Path = RAW_DATA_DIR) -> None:
         self.folder_path = folder_path
         
@@ -85,38 +88,4 @@ class CourseLoader:
             weeks.append(week)
 
         return Course(self.folder_path, weeks)
-
-
-class problematic:
-    def __init__(self, pdf_path: Path) -> None:
-        self.pdf_path = pdf_path
-
-
-    @logged
-    def get_md_text(self) -> str:
-        pdf_doc = pymupdf.open(self.pdf_path)
-
-        full_content = pymupdf4llm.to_markdown(pdf_doc,
-            header=False, footer=False, use_ocr=False, sort=True)
-        full_content = cast(str, full_content)
-        
-        pdf_doc.close()
-
-        return full_content.strip()
-
-    
-    def convert_to_md(self, output_path: Optional[Path] = None) -> Path:
-        if output_path == None:
-            weekly_folder_path = self.pdf_path.parent
-            weekly_folder_name = weekly_folder_path.name
-
-            output_path = ITERIM_DATA_DIR / weekly_folder_name / "problem_set.md"
-
-        text_content = self.get_md_text()
-        
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(text_content, encoding="utf-8")
-
-        return output_path
-
 
