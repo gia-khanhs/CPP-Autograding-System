@@ -1,1 +1,3 @@
-google-genai
+groq
+pymupdf
+pymupdf4llm

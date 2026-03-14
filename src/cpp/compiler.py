@@ -25,3 +25,9 @@ class Compiler:
         if self.compiled_exe == None: return False
         
         return True
+    
+class CodeSubmission:
+    def __init__(self, directory: Path, compiler = Compiler) -> None:
+        self.directory = directory
+        self.raw_source_directory = directory / 'main.cpp'
+        self.raw_program = compiler(self.raw_source_directory)

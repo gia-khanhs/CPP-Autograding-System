@@ -7,7 +7,7 @@ __pycache__/
 .vscode/
 
 # data
-data/
+/data/
 
 # hide api key
 config/apikey.py

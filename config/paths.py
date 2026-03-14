@@ -8,3 +8,7 @@ ITERIM_DATA_DIR = DATA_DIR / 'interim'
 PROCESSED_DATA_DIR = DATA_DIR / 'processed'
 
 CONFIG_DIR = PROJECT_ROOT / 'config'
+
+LOG_FILE = PROJECT_ROOT / 'logs' / 'func.log'
+
+EXTRACTED_SUBMISSION_FOLDER = "Submissions"
