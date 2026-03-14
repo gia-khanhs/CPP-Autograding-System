@@ -25,3 +25,8 @@ def clear_logs() -> None:
     with open(LOG_FILE, "w") as log_file:
         log_file.write("")
         log_file.close()
+
+def write_log(text: str) -> None:
+    with open(LOG_FILE, "a") as log_file:
+        log_file.write(text)
+        log_file.close()

@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Optional, cast
+from os import PathLike
 
 
 import pymupdf
@@ -9,7 +10,7 @@ import pymupdf4llm
 from config.paths import RAW_DATA_DIR, ITERIM_DATA_DIR
 from config.paths import EXTRACTED_SUBMISSION_FOLDER
 
-from ..misc.logger import logged
+from ..misc.logger import logged, write_log
 from ..misc.path import get_files_of_type, get_subfolders
 from ..misc.pdf_helper import read_pdf
 from ..misc.zip_helper import ZipExtractor
@@ -23,10 +24,9 @@ class ProblemSetLoader:
 
     def get_pdf_path(self) -> Path:
         problem_set_pdf = get_files_of_type(self.folder_path, "pdf", only=True)
-        
-        assert(type(problem_set_pdf) == Path)
-        return problem_set_pdf
 
+        return problem_set_pdf
+        
     def load(self) -> ProblemSet:
         pdf_path = self.get_pdf_path()
         text_content = read_pdf(pdf_path)
@@ -41,9 +41,8 @@ class SubmissionLoader:
     def get_zip_path(self) -> Path:
         submission_zip_path = get_files_of_type(self.folder_path, "zip", only=True)
 
-        assert(type(submission_zip_path) == Path)
         return submission_zip_path
-    
+        
     def extract_zip(self, zip_path: Path) -> None:
         zip_extractor = ZipExtractor(zip_path)
         zip_extractor.extract_if_needed(self.folder_path)
