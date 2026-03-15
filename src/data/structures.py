@@ -4,6 +4,7 @@ from pathlib import Path
 
 @dataclass
 class Problem:
+    problem_title: str
     problem_statement: str
 
 

@@ -2,13 +2,8 @@ from pathlib import Path
 from typing import Optional, cast
 
 
-import pymupdf
-import pymupdf4llm
-
-
 from config.paths import RAW_DATA_DIR
 
-from ..misc.logger import logged, write_log
 from ..misc.path import get_files_of_type, get_subfolders
 from ..misc.pdf_helper import read_pdf
 from ..misc.zip_helper import ZipExtractor

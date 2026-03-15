@@ -1,10 +1,16 @@
 from src.misc.logger import clear_logs
+from src.misc.pdf_helper import read_bold_text
 clear_logs()
 
-from src.data.ingestion import CourseLoader, WeekLoader
+from src.data.ingestion import CourseLoader
+from src.data.processing import CourseProcessor
 from config.paths import RAW_DATA_DIR
 
 CS163 = CourseLoader(RAW_DATA_DIR).load()
 
-for week in CS163.weeks:
-    print(week.problem_set.pdf_path)
+# weeks = CS163.weeks
+
+# for week in weeks:
+#     read_bold_text(week.problem_set.pdf_path)
+
+CS163 = CourseProcessor(CS163).process()
