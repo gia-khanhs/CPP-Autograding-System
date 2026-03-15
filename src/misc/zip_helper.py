@@ -13,15 +13,14 @@ class ZipExtractor:
         self.zip_path = zip_path
 
     def create_flag(self, destination: Path) -> None:
-        zip_flag = open(destination / ZipExtractor.flag_extension, "w")
+        flag_path = self.zip_path.with_suffix(ZipExtractor.flag_extension)
+        zip_flag = open(flag_path, "w")
         zip_flag.close()
 
     def is_extracted(self, destination: Path) -> bool:
-        try:
-            get_files_of_type(destination, ZipExtractor.flag_extension, only=True)
-            return True
-        except:
-            return False
+        flag_path = self.zip_path.with_suffix(ZipExtractor.flag_extension)
+        
+        return flag_path.is_file()
     
     def extract(self, destination: Path) -> None:
         if not os.path.exists(destination):

@@ -1,10 +1,11 @@
 from src.misc.logger import clear_logs
 from src.misc.pdf_helper import read_bold_text
-clear_logs()
 
 from src.data.ingestion import CourseLoader
 from src.data.processing import CourseProcessor
 from config.paths import RAW_DATA_DIR
+
+clear_logs()
 
 CS163 = CourseLoader(RAW_DATA_DIR).load()
 

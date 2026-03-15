@@ -5,7 +5,7 @@ from typing import cast, Any
 import pymupdf
 
 from .logger import logged
-
+from .text_helper import beautify_text
 
 def read_pdf(pdf_path: Path):
     full_text = []
@@ -22,6 +22,7 @@ def read_pdf(pdf_path: Path):
 
     full_text = "\n".join(full_text)
     full_text = re.sub(r"([^;\n])(\n)", r"\1 ", full_text)
+    full_text = beautify_text(full_text)
 
     return full_text
 
@@ -50,11 +51,9 @@ def read_bold_text(pdf_path: Path) -> list[str]:
                     if span["size"] > 15 and span["size"] < 25:
                         block_text.append(span["text"])
 
-            bold_text_list.append("".join(block_text))
+            bold_text_list.append(" ".join(block_text))
 
-    bold_text_list = [text
+    bold_text_list = [beautify_text(text)
                       for text in bold_text_list
                       if text]
     return bold_text_list
-        
-

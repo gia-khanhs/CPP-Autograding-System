@@ -3,9 +3,6 @@ __pycache__/
 *.py[codz]
 *$py.class
 
-# Log exception
-!logs/func.log
-
 # vscode settings
 .vscode/
 
@@ -217,3 +214,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Log exception
+!logs/func.log
