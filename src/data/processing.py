@@ -4,7 +4,7 @@ from typing import Optional
 
 
 from .ingestion import CourseLoader
-from .structures import Course, Week, Submission, ProblemSet, Problem
+from .structures import Course, Week, SubmissionSet, ProblemSet, Problem
 
 from ..misc.pdf_helper import read_bold_text, beautify_text
 from ..misc.logger import logged
@@ -20,7 +20,6 @@ class ProblemSetProcessor(Processor[ProblemSet]):
     def __init__(self, problem_set: ProblemSet) -> None:
         self.problem_set = problem_set
     
-    @logged
     def get_assignment_titles(self) -> list[str]:
         assignment_titles = []
 
@@ -38,7 +37,6 @@ class ProblemSetProcessor(Processor[ProblemSet]):
         
         return assignment_titles
 
-    @logged
     def get_problem_statements(self, problem_titles: Optional[list[str]] = None) -> list[str]:
         problem_statements = []
 
@@ -84,12 +82,12 @@ class ProblemSetProcessor(Processor[ProblemSet]):
         return self.problem_set
 
 
-class SubmissionProcessor(Processor[list[Submission]]):
-    def __init__(self, submissions: list[Submission]) -> None:
-        self.submissions = submissions
+class SubmissionSetProcessor(Processor[list[SubmissionSet]]):
+    def __init__(self, submission_set: list[SubmissionSet]) -> None:
+        self.submission_set = submission_set
 
-    def process(self) -> list[Submission]:
-        return []
+    def process(self) -> list[SubmissionSet]:
+        return self.submission_set
 
 
 class WeekProcessor(Processor[Week]):
@@ -98,7 +96,7 @@ class WeekProcessor(Processor[Week]):
 
     def process(self) -> Week:
         self.week.problem_set = ProblemSetProcessor(self.week.problem_set).process()
-        self.week.submissions = SubmissionProcessor(self.week.submissions).process()
+        self.week.submission_set = SubmissionSetProcessor(self.week.submission_set).process()
 
         return self.week
 

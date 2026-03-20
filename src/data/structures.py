@@ -18,13 +18,19 @@ class ProblemSet:
 @dataclass
 class Submission:
     folder_path: Path
+    
+
+@dataclass
+class SubmissionSet:
+    folder_path: Path
+    submissions: list[Submission] = field(default_factory=list)
 
 
 @dataclass
 class Week:
     folder_path: Path
     problem_set: ProblemSet
-    submissions: list[Submission] = field(default_factory=list)
+    submission_set: list[SubmissionSet] = field(default_factory=list)
 
 
 @dataclass

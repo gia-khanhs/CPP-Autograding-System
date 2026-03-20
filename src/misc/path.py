@@ -23,6 +23,15 @@ def get_subfiles(parent_dir: Path) -> list[Path]:
 
     return subfiles
 
+def get_only_subfolder(parent_dir: Path) -> Path:
+    subfolders = get_subfolders(parent_dir)
+
+    if len(subfolders) != 1:
+        raise FileExistsError("There are more than one folder in the directory."
+        "Expected one.")
+    
+    return subfolders[0]
+
 @overload
 def get_files_of_type(parent_dir: Path, file_extension: str, only: Literal[True]) -> Path: ...
 @overload
@@ -33,11 +42,13 @@ def get_files_of_type(parent_dir: Path, file_extension: str, only: bool = False)
              for file in parent_dir.glob(f"*.{file_extension}")
              if file.is_file()]
     
-    if len(files) != 1:
-        raise FileExistsError(f"Make sure there is exactly one .{file_extension} file in the folder!")
+    if not only:
+        return files
     else:
+        if len(files) != 1:
+            raise FileExistsError(f"Make sure there is exactly one .{file_extension} file in the folder!")
+        
         files = files[0]
-
-    return files
+        return files
 
 
