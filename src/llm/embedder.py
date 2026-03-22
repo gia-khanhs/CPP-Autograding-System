@@ -44,7 +44,8 @@ class Embedder:
     def embed(self, content: str) -> Any:
         embedding = self.api_client.models.embed_content(
             model=self.model,
-            contents=content
+            contents=content,
+            config=genai.types.EmbedContentConfig(task_type="CLASSIFICATION")
         )
         embedding = embedding.embeddings
         if type(embedding) == list:

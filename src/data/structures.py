@@ -1,6 +1,10 @@
-from dataclasses import dataclass
-from dataclasses import field
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Optional
+
+
+from src.cpp.program import Script
+
 
 @dataclass
 class Problem:
@@ -18,7 +22,7 @@ class ProblemSet:
 @dataclass
 class Submission:
     folder_path: Path
-    
+    script: Script
 
 @dataclass
 class SubmissionSet:

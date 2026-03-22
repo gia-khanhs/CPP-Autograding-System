@@ -3,7 +3,7 @@ import re
 from typing import Optional
 
 
-from .ingestion import CourseLoader
+from .ingestion import CourseIngestor
 from .structures import Course, Week, SubmissionSet, ProblemSet, Problem
 
 from ..misc.pdf_helper import read_bold_text, beautify_text

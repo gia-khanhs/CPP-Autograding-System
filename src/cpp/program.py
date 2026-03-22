@@ -1,24 +1,77 @@
 from pathlib import Path
-from dataclasses import dataclass
-
+from dataclasses import dataclass, field
+from typing import Optional, cast
 
 from clang.cindex import Index
+
+from ..misc.logger import logged, write_log
 
 
 @dataclass
 class Script:
-    file_path: Path
+    file_path: Optional[Path] = None
+    user_includes: list[Path] = field(default_factory=list)
+    __cache_file_path: Optional[Path] = None
+    __cache_has_main: bool = False
     
-    def __init__(self, file_path: Path) -> None:
+    def __init__(self, file_path: Path | None) -> None:
+        if not file_path:
+            return
+        
+        self.file_path = file_path
+        
         self.index = Index.create()
         self.parsed_code = self.index.parse(self.file_path)
-
         if not self.parsed_code:
             raise SyntaxError("The C++ file cannot be parsed!")
+        
+        if self.has_main():
+            self.user_includes = self.get_user_includes(file_path, file_path.parent)
 
     def has_main(self) -> bool:
+        if self.__cache_file_path == self.file_path:
+            return self.__cache_has_main
+
+        if not self.parsed_code:
+            return False
+        
         for cursor in self.parsed_code.cursor.get_children():
             if cursor.kind.name == "FUNCTION_DECL" and cursor.spelling == "main":
+                self.__cache_file_path = self.file_path
+                self.__cache_has_main = True
                 return True
 
+        self.__cache_file_path = self.file_path
+        self.__cache_has_main = False
         return False
+
+    def is_under(self, root: Path, path: Path) -> bool:
+        return path.resolve().is_relative_to(root.resolve())
+        
+    @logged
+    def get_user_includes(self, main_file: Path, project_root: Path, args=None) -> list[Path]:
+        if not self.parsed_code:
+            return []
+        
+        user_includes: set[Path] = set()
+
+        if args is None:
+            args = ["-x", "c++", "-std=c++17"]
+
+        index = Index.create()
+        translation_unit = index.parse(main_file, args=args)
+
+        for include in translation_unit.get_includes():
+            if include.is_input_file: # Skip the main_file
+                continue
+
+            included = include.include
+            if included is None or included.name is None:
+                continue
+
+            included_path = Path(included.name).resolve()
+
+            if self.is_under(project_root, included_path): # not get std libs like iostream and such
+                user_includes.add(included_path)
+
+        return list(user_includes)
