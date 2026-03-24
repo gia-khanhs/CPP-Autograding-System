@@ -8,7 +8,7 @@ from ..misc.path import get_files_of_type, get_subfolders, get_only_subfolder
 from ..misc.pdf_helper import read_pdf
 from ..misc.archive_helper import ArchiveExtractor, get_only_archive
 from ..misc.logger import logged
-from ..cpp.program import Script
+from ..cpp.program import Script, has_main
 
 from .structures import Course, Week, ProblemSet, Problem, SubmissionSet, Submission
 
@@ -46,8 +46,7 @@ class SubmissionIngestor(Ingestor[list[Submission]]):
 
             cpp_paths = get_files_of_type(search_folder, "cpp", False)
             for cpp_path in cpp_paths:
-                cpp_script = Script(cpp_path)
-                if cpp_script.has_main():
+                if has_main(cpp_path):
                     return cpp_path
 
             subfolders = get_subfolders(search_folder)
@@ -62,7 +61,7 @@ class SubmissionIngestor(Ingestor[list[Submission]]):
         for submission_folder in submission_folders:
             main_path = self.find_main_script(submission_folder)
             
-            submission = Submission(submission_folder, Script(main_path))
+            submission = Submission(submission_folder, Script(main_path, processing_includes=True))
             submissions.append(submission)
 
         return submissions
@@ -130,11 +129,12 @@ class SubmissionSetIngestor(Ingestor[list[SubmissionSet]]):
         submission_sets = []
 
         self.extract_master_archive()
+        archive_folders = self.get_submission_set_archive_folders()
         self.extract_submission_set_archives()
         submission_set_folders = self.get_submission_set_folders()
 
-        for submission_set_folder in submission_set_folders:
-            submission_set = SubmissionSet(submission_set_folder)
+        for submission_set_folder, archive_folder in zip(submission_set_folders, archive_folders):
+            submission_set = SubmissionSet(submission_set_folder, archive_folder)
             submission_set.submissions = SubmissionIngestor(submission_set).ingest()
             submission_sets.append(submission_set)
 

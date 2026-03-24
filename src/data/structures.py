@@ -14,8 +14,8 @@ class Problem:
 
 @dataclass
 class ProblemSet:
-    pdf_path: Path
-    text_content: str = ""
+    pdf_path: Optional[Path]
+    text_content: Optional[str]
     problems: list[Problem] = field(default_factory=list)
 
 
@@ -27,6 +27,7 @@ class Submission:
 @dataclass
 class SubmissionSet:
     folder_path: Path
+    archive_folder: Optional[Path]
     submissions: list[Submission] = field(default_factory=list)
 
 

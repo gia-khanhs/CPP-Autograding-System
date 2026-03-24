@@ -7,6 +7,19 @@ from clang.cindex import Index
 from ..misc.logger import logged, write_log
 
 
+def has_main(cpp_file: Path):
+    index = Index.create()
+    parsed_code = index.parse(cpp_file)
+
+    if not parsed_code:
+        return False
+        
+    for cursor in parsed_code.cursor.get_children():
+        if cursor.kind.name == "FUNCTION_DECL" and cursor.spelling == "main":
+            return True
+        
+    return False
+
 @dataclass
 class Script:
     file_path: Optional[Path] = None
@@ -14,7 +27,7 @@ class Script:
     __cache_file_path: Optional[Path] = None
     __cache_has_main: bool = False
     
-    def __init__(self, file_path: Path | None) -> None:
+    def __init__(self, file_path: Path | None, processing_includes: bool) -> None:
         if not file_path:
             return
         
@@ -25,8 +38,14 @@ class Script:
         if not self.parsed_code:
             raise SyntaxError("The C++ file cannot be parsed!")
         
-        if self.has_main():
-            self.user_includes = self.get_user_includes(file_path, file_path.parent)
+        if processing_includes:
+            if self.has_main():
+                self.user_includes = self.get_user_includes(file_path, file_path.parent)
+        else:
+            folder_path = file_path.parent
+            self.user_includes = [include_path
+                                  for include_path in folder_path.rglob("*")
+                                  if include_path.is_file() and include_path != file_path]
 
     def has_main(self) -> bool:
         if self.__cache_file_path == self.file_path:

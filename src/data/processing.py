@@ -23,7 +23,8 @@ class ProblemSetProcessor(Processor[ProblemSet]):
     def get_assignment_titles(self) -> list[str]:
         assignment_titles = []
 
-        bold_texts = read_bold_text(self.problem_set.pdf_path)
+        pdf_path = self.problem_set.pdf_path if self.problem_set.pdf_path else Path()
+        bold_texts = read_bold_text(pdf_path)
 
         for text in bold_texts:
             if text.startswith("Assignment"):
@@ -44,7 +45,8 @@ class ProblemSetProcessor(Processor[ProblemSet]):
             problem_titles = self.get_assignment_titles()
                 
         titles_wo_space = remove_space(problem_titles)
-        problem_set_lines = split_lines(self.problem_set.text_content)
+        text_content = self.problem_set.text_content if self.problem_set.text_content else ""
+        problem_set_lines = split_lines(text_content)
         problem_set_lines_wo_space = remove_space(problem_set_lines)
 
         problem_id = 0
