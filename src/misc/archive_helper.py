@@ -7,8 +7,8 @@ import rarfile
 import zipfile
 
 
-from src.misc.path import get_files_of_type
-from src.misc.logger import logged
+from .path import get_files_of_type
+from .debug import logged
 
 
 def get_only_archive(folder: Path) -> Path:

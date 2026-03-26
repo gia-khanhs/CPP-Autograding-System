@@ -4,7 +4,7 @@ from typing import Optional, cast
 
 from clang.cindex import Index
 
-from ..misc.logger import logged, write_log
+from ..misc.debug import logged, write_log
 
 
 def has_main(cpp_file: Path):
@@ -32,6 +32,11 @@ class Script:
             return
         
         self.file_path = file_path
+        self.user_includes = []
+        self.__cache_file_path = None
+        self.__cache_has_main = False
+        self.index = None
+        self.parsed_code = None
         
         self.index = Index.create()
         self.parsed_code = self.index.parse(self.file_path)
@@ -41,11 +46,11 @@ class Script:
         if processing_includes:
             if self.has_main():
                 self.user_includes = self.get_user_includes(file_path, file_path.parent)
-        else:
-            folder_path = file_path.parent
-            self.user_includes = [include_path
-                                  for include_path in folder_path.rglob("*")
-                                  if include_path.is_file() and include_path != file_path]
+        # else:
+        #     folder_path = file_path.parent
+        #     self.user_includes = [include_path
+        #                           for include_path in folder_path.rglob("*")
+        #                           if include_path.is_file() and include_path != file_path]
 
     def has_main(self) -> bool:
         if self.__cache_file_path == self.file_path:
@@ -94,3 +99,12 @@ class Script:
                 user_includes.add(included_path)
 
         return list(user_includes)
+    
+    def prepare_includes(self) -> None:
+        folder_path = Path()
+        if self.file_path:
+            folder_path = self.file_path.parent
+
+        self.user_includes = [include_path
+                                for include_path in folder_path.rglob("*")
+                                if include_path.is_file() and include_path != self.file_path]

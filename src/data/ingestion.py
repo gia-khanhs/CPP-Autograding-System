@@ -7,7 +7,7 @@ from config.paths import RAW_DATA_DIR, EXTRACTED_SUBMISSION_MASTER_FOLDER
 from ..misc.path import get_files_of_type, get_subfolders, get_only_subfolder
 from ..misc.pdf_helper import read_pdf
 from ..misc.archive_helper import ArchiveExtractor, get_only_archive
-from ..misc.logger import logged
+from ..misc.debug import logged
 from ..cpp.program import Script, has_main
 
 from .structures import Course, Week, ProblemSet, Problem, SubmissionSet, Submission

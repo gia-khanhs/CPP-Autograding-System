@@ -8,6 +8,7 @@ import os
 from .structures import Course, Week, ProblemSet, Problem, SubmissionSet, Submission
 from .processing import CourseProcessor, WeekProcessor, ProblemSetProcessor, SubmissionSetProcessor
 from ..misc.path import get_subfolders, get_files_of_type
+from ..misc.debug import timed
 from ..cpp.program import Script
 from config.paths import PROCESSED_DATA_DIR
 
@@ -197,6 +198,7 @@ class CourseLoader(Loader[Course]):
     def __init__(self, load_path: Path = PROCESSED_DATA_DIR) -> None:
         super().__init__(load_path)
 
+    @timed
     def load(self) -> Course:
         week_paths = get_subfolders(self.load_path)
         weeks = []

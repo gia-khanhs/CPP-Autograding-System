@@ -1,4 +1,4 @@
-from src.misc.logger import clear_logs
+from src.misc.debug import clear_logs
 from src.misc.pdf_helper import read_bold_text
 
 from src.data.ingestion import CourseIngestor

@@ -4,7 +4,7 @@ from typing import cast, Any
 
 import pymupdf
 
-from .logger import logged
+from .debug import logged
 from .text_helper import beautify_text
 
 def read_pdf(pdf_path: Path):

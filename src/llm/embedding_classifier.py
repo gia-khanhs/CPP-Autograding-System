@@ -1,5 +1,5 @@
 from src.llm.embedder import Embedder, cosine_similarity
-from src.misc.logger import logged
+from misc.debug import logged
 
 
 class EmbeddingClassifier:

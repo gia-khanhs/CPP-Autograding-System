@@ -7,7 +7,7 @@ from .ingestion import CourseIngestor
 from .structures import Course, Week, SubmissionSet, ProblemSet, Problem
 
 from ..misc.pdf_helper import read_bold_text, beautify_text
-from ..misc.logger import logged
+from ..misc.debug import logged
 from ..misc.text_helper import remove_space, split_lines, join_lines
 
 

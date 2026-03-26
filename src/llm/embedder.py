@@ -6,7 +6,7 @@ from google import genai
 
 
 from src.llm.apicaller import LLMCaller
-from src.misc.logger import logged
+from misc.debug import logged
 from config.apikey import GEMINI_API_KEY
 
 
