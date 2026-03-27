@@ -48,5 +48,7 @@ def timed(function):
 
         print(f"[{formatted_time}] {function.__name__} took {elapsed_time} to run!")
 
+        return returned_val
+
     return wrapper
 #endregion

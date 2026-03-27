@@ -28,18 +28,20 @@ class Script:
     __cache_has_main: bool = False
     
     def __init__(self, file_path: Path | None, processing_includes: bool) -> None:
-        if not file_path:
-            return
-        
         self.file_path = file_path
         self.user_includes = []
         self.__cache_file_path = None
         self.__cache_has_main = False
         self.index = None
         self.parsed_code = None
+
+        if (not file_path) or (not file_path.is_file()):
+            self.file_path = None
+            return
         
+        args = ["-x", "c++", "-std=c++17"]
         self.index = Index.create()
-        self.parsed_code = self.index.parse(self.file_path)
+        self.parsed_code = self.index.parse(self.file_path, args=args)
         if not self.parsed_code:
             raise SyntaxError("The C++ file cannot be parsed!")
         

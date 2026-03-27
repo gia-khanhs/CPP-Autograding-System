@@ -4,6 +4,7 @@ from src.misc.pdf_helper import read_bold_text
 from src.data.ingestion import CourseIngestor
 from src.data.processing import CourseProcessor
 from src.data.persistence import CourseSaver, CourseLoader
+from src.misc.text_helper import remove_space
 from config.paths import RAW_DATA_DIR, PROCESSED_DATA_DIR
 
 clear_logs()
@@ -12,7 +13,19 @@ clear_logs()
 # CS163 = CourseProcessor(CS163).process()
 # CourseSaver(CS163).save()
 CS163 = CourseLoader().load()
-print(CS163)
+
+for id, week in enumerate(CS163.weeks):
+    print("i" * (id + 1))
+    # for ssid, submission_set in enumerate(week.submission_set):
+        # print(submission_set.submissions[0].script)
+
+    for pid, problem in enumerate(week.problem_set.problems):
+        title = problem.problem_title
+        title = "".join(title.split()).lower()
+        statement = problem.problem_statement
+
+        if "-paperassignment" in title:
+            print(f"{pid + 1} - 01")
 
 def try_classify():
     W01 = CS163.weeks[1]

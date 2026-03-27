@@ -6,9 +6,10 @@ import shutil
 import os
 
 from .structures import Course, Week, ProblemSet, Problem, SubmissionSet, Submission
+from .structures import LazyProblem, LazySubmission
 from .processing import CourseProcessor, WeekProcessor, ProblemSetProcessor, SubmissionSetProcessor
 from ..misc.path import get_subfolders, get_files_of_type
-from ..misc.debug import timed
+from ..misc.debug import timed, logged
 from ..cpp.program import Script
 from config.paths import PROCESSED_DATA_DIR
 
@@ -115,18 +116,21 @@ class Loader[T]:
     def load(self, *args, **kargs) -> T: ...
 
 
-class SubmissionLoader(Loader[Submission | None]):
+class SubmissionLoader(Loader[LazySubmission]):
     def __init__(self, load_path: Path) -> None:
         super().__init__(load_path)
 
-    def load(self) -> Submission | None:
-        main_file = self.load_path / MAIN_FILE
+    # def load(self) -> Submission | None:
+    #     main_file = self.load_path / MAIN_FILE
 
-        if not main_file.is_file():
-            return None
-        else:
-            return Submission(self.load_path, Script(main_file, False))
+    #     if not main_file.is_file():
+    #         return None
+    #     else:
+    #         return Submission(self.load_path, Script(main_file, False))
 
+    def load(self) -> LazySubmission:
+        self.main_file = self.load_path / MAIN_FILE
+        return LazySubmission(self.main_file)
 
 
 class SubmissionSetLoader(Loader[SubmissionSet]):
@@ -145,20 +149,23 @@ class SubmissionSetLoader(Loader[SubmissionSet]):
         return submission_set
 
 
-class ProblemLoader(Loader[Problem]):
+class ProblemLoader(Loader[LazyProblem]):
     def __init__(self, load_path: Path) -> None:
         super().__init__(load_path)
 
-    def load(self) -> Problem:
-        problem_dict = None
+    # def load(self) -> Problem:
+    #     problem_dict = None
 
-        with open(self.load_path, "r", encoding="utf-8") as saved_file:
-            saved_problem = saved_file.read()
-            problem_dict =  json.loads(saved_problem)
+    #     with open(self.load_path, "r", encoding="utf-8") as saved_file:
+    #         saved_problem = saved_file.read()
+    #         problem_dict =  json.loads(saved_problem)
 
-            saved_file.close()
+    #         saved_file.close()
 
-        return Problem(**problem_dict)
+    #     return Problem(**problem_dict)
+
+    def load(self) -> LazyProblem:
+        return LazyProblem(self.load_path)
 
 
 class ProblemSetLoader(Loader[ProblemSet]):
@@ -198,7 +205,6 @@ class CourseLoader(Loader[Course]):
     def __init__(self, load_path: Path = PROCESSED_DATA_DIR) -> None:
         super().__init__(load_path)
 
-    @timed
     def load(self) -> Course:
         week_paths = get_subfolders(self.load_path)
         weeks = []
