@@ -52,3 +52,16 @@ def timed(function):
 
     return wrapper
 #endregion
+
+def delayed(function):
+    def wrapper(*args, **kargs):
+        initial_time = time.perf_counter()
+        returned_val = function(*args, **kargs)
+        
+        while True:
+            if time.perf_counter() - initial_time > 2.5:
+                break
+        
+        return returned_val
+    
+    return wrapper

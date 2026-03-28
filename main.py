@@ -7,12 +7,16 @@ from src.data.persistence import CourseSaver, CourseLoader
 from src.misc.text_helper import remove_space
 from config.paths import RAW_DATA_DIR, PROCESSED_DATA_DIR
 
+from src.llm.problem_classifier import ProblemClassifier
+
 clear_logs()
 
 # CS163 = CourseIngestor(RAW_DATA_DIR).ingest()
 # CS163 = CourseProcessor(CS163).process()
 # CourseSaver(CS163).save()
 CS163 = CourseLoader().load()
+
+classifier = ProblemClassifier()
 
 for id, week in enumerate(CS163.weeks):
     print("i" * (id + 1))
@@ -24,20 +28,4 @@ for id, week in enumerate(CS163.weeks):
         title = "".join(title.split()).lower()
         statement = problem.problem_statement
 
-        if "-paperassignment" in title:
-            print(f"{pid + 1} - 01")
-
-def try_classify():
-    W01 = CS163.weeks[1]
-
-    from src.llm.embedding_classifier import EmbeddingClassifier
-
-    classes = ["A local programming assignment requiring source code submission, not a handwritten response and not an external online judge task.",
-            "A programming task solved through an external judging website, not merely a local course coding submission.",
-            "This assignment is answered through explanation, tracing, or drawing rather than by implementing a program."]
-    texts = []
-    for problem in W01.problem_set.problems:
-        texts.append(f"{problem.problem_title=}\n{problem.problem_statement=}")
-
-    ecls = EmbeddingClassifier(classes)
-    ecls.predict(texts)
+        print(classifier.classify(f"{title=}\n{statement=}"))
