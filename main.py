@@ -14,9 +14,9 @@ from src.llm.problem_classifier import ProblemClassifier
 clear_logs()
 
 
-CS163 = CourseIngestor(RAW_DATA_DIR).ingest()
-CS163 = CourseProcessor(CS163).process()
-CourseSaver(CS163).save()
+# CS163 = CourseIngestor(RAW_DATA_DIR).ingest()
+# CS163 = CourseProcessor(CS163).process()
+# CourseSaver(CS163).save()
 
 # CS163 = CourseLoader().load()
 

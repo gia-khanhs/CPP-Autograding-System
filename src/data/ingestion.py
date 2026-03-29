@@ -102,36 +102,66 @@ class SubmissionSetIngestor(Ingestor[list[SubmissionSet]]):
 
         return submission_set_archives
 
-    def extract_submission_set_archives(self) -> None:
+    def find_submission_set_folder(self, extracted_destination: Path, n_problems: int) -> Path:
+        queue = []
+        queue.append(extracted_destination)
+
+        while len(queue):
+            top = queue[0]
+            queue.pop(0)
+
+            subfolders = get_subfolders(top)
+            if len(subfolders) == n_problems:
+                return top
+            
+            queue = queue + subfolders
+
+        return extracted_destination # cannot find => return the default destination
+
+    def extract_submission_set_archives(self) -> list[Path]:
+        # Returns the folders PROBABLY containing submission folders of all problems
         submission_set_archive_folders = self.get_submission_set_archive_folders()
         submission_set_archives = self.get_submission_set_archives()
+
+        submission_set_folders = []
 
         for destination, archive in zip(submission_set_archive_folders, submission_set_archives):
             submission_extractor = ArchiveExtractor(archive)
             submission_extractor.extract_if_needed(destination)
 
-    def get_submission_set_folders(self) -> list[Path]:
-        submission_set_folders = []
-        submission_set_archive_folders = self.get_submission_set_archive_folders()
+            n_problems = archive.stem[-2:]
+            n_problems = "".join([char
+                          for char in n_problems
+                          if char.isdigit()])
+            n_problems = int(n_problems)
 
-        for submission_set_folder in submission_set_archive_folders:
-            extracted_folder = None
-            try:
-                extracted_folder = get_only_subfolder(submission_set_folder)
-            except:
-                extracted_folder = submission_set_folder
-
-            submission_set_folders.append(extracted_folder)
+            submission_set_folder = self.find_submission_set_folder(destination, n_problems)
+            submission_set_folders.append(submission_set_folder)
 
         return submission_set_folders
+
+    # def get_submission_set_folders(self) -> list[Path]:
+    #     submission_set_folders = []
+    #     submission_set_archive_folders = self.get_submission_set_archive_folders()
+
+    #     for submission_set_folder in submission_set_archive_folders:
+    #         extracted_folder = None
+    #         try:
+    #             extracted_folder = get_only_subfolder(submission_set_folder)
+    #         except:
+    #             extracted_folder = submission_set_folder
+
+    #         submission_set_folders.append(extracted_folder)
+
+    #     return submission_set_folders
 
     def ingest(self) -> list[SubmissionSet]:
         submission_sets = []
 
         self.extract_master_archive()
         archive_folders = self.get_submission_set_archive_folders()
-        self.extract_submission_set_archives()
-        submission_set_folders = self.get_submission_set_folders()
+        submission_set_folders = self.extract_submission_set_archives()
+        # submission_set_folders = self.get_submission_set_folders()
 
         for submission_set_folder, archive_folder in zip(submission_set_folders, archive_folders):
             submission_set = SubmissionSet(submission_set_folder, archive_folder)

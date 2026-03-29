@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, overload
+from typing import Literal, overload, Optional
 
 def get_subpaths(parent_dir: Path) -> list[Path]:
     subpaths = [path
@@ -8,10 +8,12 @@ def get_subpaths(parent_dir: Path) -> list[Path]:
     return subpaths
 
 
-def get_subfolders(parent_dir: Path) -> list[Path]:
+def get_subfolders(parent_dir: Path, excludes: Optional[set[str]] = None) -> list[Path]:
+    excludes = excludes or {".vscode"}
+
     subfolders = [folder
                   for folder in parent_dir.iterdir()
-                  if folder.is_dir()]
+                  if folder.is_dir() and folder.name not in excludes]
     
     return subfolders
 
