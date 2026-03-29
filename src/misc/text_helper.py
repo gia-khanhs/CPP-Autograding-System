@@ -25,3 +25,8 @@ def remove_space(text: list[str] | str) -> list[str] | str:
         text = "".join(text.split())
 
     return text
+
+def find_urls(text: str) -> list[str]:
+    urls = re.findall(r"(https?://\S+)", text)
+
+    return urls

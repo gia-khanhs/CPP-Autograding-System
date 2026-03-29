@@ -74,7 +74,6 @@ class Script:
     def is_under(self, root: Path, path: Path) -> bool:
         return path.resolve().is_relative_to(root.resolve())
         
-    @logged
     def get_user_includes(self, main_file: Path, project_root: Path, args=None) -> list[Path]:
         if not self.parsed_code:
             return []

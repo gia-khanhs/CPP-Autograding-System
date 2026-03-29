@@ -120,4 +120,4 @@ Return only valid JSON:
                 print(error)
                 self.swap_model()
 
-        return '{"label": "", "confidence": 0, "reason": ""}'
+        return '{"label": ""}'

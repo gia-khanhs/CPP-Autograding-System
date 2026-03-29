@@ -1,6 +1,7 @@
 from pathlib import Path
 import re
 from typing import Optional
+import json
 
 
 from .ingestion import CourseIngestor
@@ -8,7 +9,8 @@ from .structures import Course, Week, SubmissionSet, ProblemSet, Problem
 
 from ..misc.pdf_helper import read_bold_text, beautify_text
 from ..misc.debug import logged
-from ..misc.text_helper import remove_space, split_lines, join_lines
+from ..misc.text_helper import remove_space, split_lines, join_lines, find_urls
+from ..llm.problem_classifier import ProblemClassifier
 
 
 class Processor[T]:
@@ -17,9 +19,12 @@ class Processor[T]:
 
 
 class ProblemSetProcessor(Processor[ProblemSet]):
+    problem_classifier = ProblemClassifier()
+
     def __init__(self, problem_set: ProblemSet) -> None:
         self.problem_set = problem_set
     
+    @logged
     def get_assignment_titles(self) -> list[str]:
         assignment_titles = []
 
@@ -54,16 +59,16 @@ class ProblemSetProcessor(Processor[ProblemSet]):
         end_line_id = 0
         for line_id, line in enumerate(problem_set_lines_wo_space):
             if line == titles_wo_space[problem_id]:
-                end_line_id = line_id - 1
+                end_line_id = line_id
 
                 if problem_id:
                     statement = problem_set_lines[start_line_id: end_line_id]
-                    statement = join_lines(statement)
+                    statement = join_lines(statement).strip()
                     problem_statements.append(statement)
 
                 if line == titles_wo_space[-1]: # Get the statement for the last problem
                     statement = problem_set_lines[line_id + 1:]
-                    statement = join_lines(statement)
+                    statement = join_lines(statement).strip()
                     problem_statements.append(statement)
                     break
                 
@@ -73,12 +78,23 @@ class ProblemSetProcessor(Processor[ProblemSet]):
         
         return problem_statements
 
+
+    def get_oj_statement(self, raw_statement: str) -> str:
+        url = find_urls(raw_statement)[0]
+        
+
+        return ""
+
     def process(self) -> ProblemSet:
         assignment_titles = self.get_assignment_titles()
-        problem_statements = self.get_problem_statements(assignment_titles)
+        problem_statements = self.get_problem_statements(assignment_titles) 
 
         for title, statement in zip(assignment_titles, problem_statements):
-            problem = Problem(title, statement)
+            problem_type = json.loads(self.problem_classifier.classify(
+                f"{title=}\n{statement=}"
+            ))["label"]
+
+            problem = Problem(title, statement, problem_type)
             self.problem_set.problems.append(problem)
 
         return self.problem_set

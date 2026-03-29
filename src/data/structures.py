@@ -11,6 +11,7 @@ from src.cpp.program import Script
 class Problem:
     problem_title: str
     problem_statement: str
+    type: str
 
     @property
     def title(self) -> Optional[str]:
