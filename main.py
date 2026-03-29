@@ -1,18 +1,13 @@
 from pathlib import Path
 
 from src.misc.debug import clear_logs
-from src.misc.pdf_helper import read_bold_text
 
-from src.data.ingestion import CourseIngestor, WeekIngestor
-from src.data.processing import CourseProcessor, WeekProcessor
-from src.data.persistence import CourseSaver, CourseLoader
-from src.misc.text_helper import remove_space
-from config.paths import RAW_DATA_DIR, PROCESSED_DATA_DIR
-
-from src.llm.problem_classifier import ProblemClassifier
+from src.data.pipeline import DataPipeline
 
 clear_logs()
 
+data_pipeline = DataPipeline()
+CS163 = data_pipeline.get()
 
 # CS163 = CourseIngestor(RAW_DATA_DIR).ingest()
 # CS163 = CourseProcessor(CS163).process()

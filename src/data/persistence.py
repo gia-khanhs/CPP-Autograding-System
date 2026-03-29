@@ -8,14 +8,14 @@ import os
 from .structures import Course, Week, ProblemSet, Problem, SubmissionSet, Submission
 from .structures import LazyProblem, LazySubmission
 from .processing import CourseProcessor, WeekProcessor, ProblemSetProcessor, SubmissionSetProcessor
+from .fingerprints import fingerprint_directory
+from .consts import PS_FOLDER, SS_FOLDER, MAIN_FILE, HASH_FILE
 from ..misc.path import get_subfolders, get_files_of_type
 from ..misc.debug import timed, logged
 from ..cpp.program import Script
 from config.paths import PROCESSED_DATA_DIR
 
-PS_FOLDER = "ProblemSet"
-SS_FOLDER = "SubmissionSet"
-MAIN_FILE = "main.cpp"
+
 
 #region saver
 class Saver[T]:
@@ -104,9 +104,18 @@ class CourseSaver(Saver[Course]):
         self.course = course
 
     def save(self, save_path: Path = PROCESSED_DATA_DIR) -> None:
+        week_hashes = {}
         for id, week in enumerate(self.course.weeks):
-            week_folder = save_path / f"W{id + 1}"
+            week_name = f"W{id + 1}"
+            week_folder = save_path / week_name
             WeekSaver(week).save(week_folder)
+
+            week_hash = fingerprint_directory(week_folder)
+            week_hashes[week_name] = week_hash
+
+        with open(save_path / HASH_FILE, "w") as hash_file:
+            json.dump(week_hashes, hash_file)
+            hash_file.close()
 #endregion
 
 #region loader

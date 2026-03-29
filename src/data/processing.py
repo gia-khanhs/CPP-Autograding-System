@@ -24,7 +24,6 @@ class ProblemSetProcessor(Processor[ProblemSet]):
     def __init__(self, problem_set: ProblemSet) -> None:
         self.problem_set = problem_set
     
-    @logged
     def get_assignment_titles(self) -> list[str]:
         assignment_titles = []
 

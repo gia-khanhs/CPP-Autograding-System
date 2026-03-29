@@ -120,4 +120,5 @@ Return only valid JSON:
                 print(error)
                 self.swap_model()
 
-        return '{"label": ""}'
+        returned_value = self.try_classify(problem_details)
+        return returned_value
