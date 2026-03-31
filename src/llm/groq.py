@@ -60,11 +60,11 @@ class APICaller:
 class LLMWebSearcher:
     client = Groq(api_key=GROQ_API_KEY)
 
-    def __init__(self, model="openai/gpt-oss-20b") -> None:
+    def __init__(self, model="groq/compound-mini") -> None:
         self.model = model
 
     def generate(self, system_prompt: str, user_prompt: str) -> str:
-        chat_completion = APICaller.client.chat.completions.create(
+        chat_completion = LLMWebSearcher.client.chat.completions.create(
             model=self.model,
             messages=[
                 {
@@ -76,10 +76,11 @@ class LLMWebSearcher:
                     "content": user_prompt
                 }
             ],
-            tool_choice="required",
-            tools=[
-                {"type": "browser_search"}
-            ],
+            tool_choice="auto",
+            # tool_choice="required",
+            # tools=[
+            #     {"type": "browser_search"}
+            # ],
             temperature=0.0
         )
 

@@ -16,7 +16,7 @@ from bs4 import BeautifulSoup
 from curl_cffi import requests
 
 # region llm api web search
-oss_20b = LLMWebSearcher()
+oss_20b = LLMWebSearcher("groq/compound-mini")
 search_instruction = "You are given an url to an online judger for a coding problem. Do a web search and return only the exact problem statement."
 @delayed
 def get_problem_statement(url: str):

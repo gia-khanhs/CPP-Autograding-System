@@ -28,3 +28,6 @@ CS163 = data_pipeline.get()
 #         statement = problem.problem_statement
 
 #         print(classifier.classify(f"{title=}\n{statement=}"))
+
+# from src.misc.oj_problem import get_problem_statement
+# print(get_problem_statement("https://www.hackerrank.com/challenges/ctci-ice-cream-parlor/problem"))
