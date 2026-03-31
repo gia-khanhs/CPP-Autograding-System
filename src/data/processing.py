@@ -7,6 +7,7 @@ import json
 from .ingestion import CourseIngestor
 from .structures import Course, Week, SubmissionSet, ProblemSet, Problem
 
+from ..misc.oj_problem import get_problem_statement
 from ..misc.pdf_helper import read_bold_text, beautify_text
 from ..misc.debug import logged
 from ..misc.text_helper import remove_space, split_lines, join_lines, find_urls
@@ -77,13 +78,6 @@ class ProblemSetProcessor(Processor[ProblemSet]):
         
         return problem_statements
 
-
-    def get_oj_statement(self, raw_statement: str) -> str:
-        url = find_urls(raw_statement)[0]
-        
-
-        return ""
-
     def process(self) -> ProblemSet:
         assignment_titles = self.get_assignment_titles()
         problem_statements = self.get_problem_statements(assignment_titles) 
@@ -92,6 +86,10 @@ class ProblemSetProcessor(Processor[ProblemSet]):
             problem_type = json.loads(self.problem_classifier.classify(
                 f"{title=}\n{statement=}"
             ))["label"]
+
+            if problem_type == "online_judge":
+                oj_url = find_urls(statement)[0]
+                statement = get_problem_statement(oj_url)
 
             problem = Problem(title, statement, problem_type)
             self.problem_set.problems.append(problem)

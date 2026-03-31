@@ -3,11 +3,11 @@ from pathlib import Path
 
 from .fingerprints import fingerprint_directory
 from .structures import Course
-from .ingestion import WeekIngestor
-from .processing import WeekProcessor
-from .persistence import CourseLoader, WeekSaver
+from .ingestion import CourseIngestor, WeekIngestor
+from .processing import CourseProcessor, WeekProcessor
+from .persistence import CourseLoader, CourseSaver, WeekSaver
 from .consts import PS_FOLDER, SS_FOLDER, MAIN_FILE, HASH_FILE
-from ..misc.debug import logged
+from ..misc.debug import logged, timed
 from ..misc.path import get_subfolders
 from config.paths import RAW_DATA_DIR, PROCESSED_DATA_DIR
 
@@ -36,7 +36,7 @@ class DataPipeline:
         hash_path = self.processed_dir / HASH_FILE
 
         if not hash_path.is_file():
-            return saved_hashes
+            raise FileExistsError("Cannot find saved hash file!")
         
         with open(hash_path, "r") as hash_file:
             file_content = hash_file.read()
@@ -54,7 +54,8 @@ class DataPipeline:
         saved_len = len(saved_hashes)
         cur_len = len(cur_hashes)
         if saved_len != cur_len:
-            return list(range(max(saved_len, cur_len)))
+            raise ValueError("Corrupted processed files! The number of weeks in the processed folder"
+            "and the number of hashes does not match!")
 
         for id, week_name in enumerate(saved_hashes):
             if saved_hashes.get(week_name) != cur_hashes.get(week_name):
@@ -83,12 +84,22 @@ class DataPipeline:
 
         return course
 
-    @logged
+    def process_full_course(self) -> Course:
+        course = CourseIngestor(self.raw_dir).ingest()
+        course = CourseProcessor(course).process()
+        CourseSaver(course).save(self.processed_dir)
+
+        return course
+
+    @timed
     def get(self) -> Course:
         course = CourseLoader().load()
 
-        outdated_weeks = self.get_outdated_week_ids()
-        if len(outdated_weeks):
-            course = self.update_weeks(course, outdated_weeks)
+        try:
+            outdated_weeks = self.get_outdated_week_ids()
+            if len(outdated_weeks):
+                course = self.update_weeks(course, outdated_weeks)
+        except:
+            course = self.process_full_course()
 
         return course

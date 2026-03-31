@@ -46,7 +46,41 @@ class APICaller:
                     "content": user_prompt
                 }
             ],
-            model=self.model
+            model=self.model,
+            max_completion_tokens=8192
+        )
+
+        returned_content = chat_completion.choices[0].message.content
+
+        if returned_content is None:
+            raise LookupError(f"Cannot get the response from {self.model}")
+
+        return returned_content
+    
+class LLMWebSearcher:
+    client = Groq(api_key=GROQ_API_KEY)
+
+    def __init__(self, model="openai/gpt-oss-20b") -> None:
+        self.model = model
+
+    def generate(self, system_prompt: str, user_prompt: str) -> str:
+        chat_completion = APICaller.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": user_prompt
+                }
+            ],
+            tool_choice="required",
+            tools=[
+                {"type": "browser_search"}
+            ],
+            temperature=0.0
         )
 
         returned_content = chat_completion.choices[0].message.content

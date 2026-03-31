@@ -1,5 +1,5 @@
 from config.apikey import GROQ_API_KEY
-from .grog import CLASSIFIER_MODELS
+from .groq import CLASSIFIER_MODELS
 from ..misc.debug import delayed
 
 from groq import Groq
