@@ -13,12 +13,19 @@ from .consts import PS_FOLDER, SS_FOLDER, MAIN_FILE, HASH_FILE
 from ..misc.path import get_subfolders, get_files_of_type
 from ..misc.debug import timed, logged
 from ..cpp.program import Script
+from ..gui.logger_backend import load_page_logged
 from config.paths import PROCESSED_DATA_DIR
 
 
 
 #region saver
 class Saver[T]:
+    # def __init_subclass__(cls, **kwargs) -> None:
+    #     super().__init_subclass__(**kwargs)
+
+    #     if "__init__" in cls.__dict__:
+    #         cls.__init__ = load_page_logged(cls.__init__)
+
     def save(self, save_path: Path): ...
 
 
@@ -122,6 +129,13 @@ class CourseSaver(Saver[Course]):
 class Loader[T]:
     def __init__(self, load_path: Path) -> None:
         self.load_path = load_path
+
+    # def __init_subclass__(cls, **kwargs) -> None:
+    #     super().__init_subclass__(**kwargs)
+
+    #     if "__init__" in cls.__dict__:
+    #         cls.__init__ = load_page_logged(cls.__init__)
+    
     def load(self, *args, **kargs) -> T: ...
 
 

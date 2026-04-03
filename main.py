@@ -2,12 +2,14 @@ from pathlib import Path
 
 from src.misc.debug import clear_logs
 
-from src.data.pipeline import DataPipeline
+from src.gui.main import app, get_course, get_load_page_logs
 
 clear_logs()
 
-data_pipeline = DataPipeline()
-CS163 = data_pipeline.get()
+app.run()
+
+# data_pipeline = DataPipeline()
+# CS163 = data_pipeline.get()
 
 # CS163 = CourseIngestor(RAW_DATA_DIR).ingest()
 # CS163 = CourseProcessor(CS163).process()

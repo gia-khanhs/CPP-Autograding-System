@@ -9,11 +9,17 @@ from ..misc.pdf_helper import read_pdf
 from ..misc.archive_helper import ArchiveExtractor, get_only_archive
 from ..misc.debug import logged
 from ..cpp.program import Script, has_main
-
+from ..gui.logger_backend import load_page_logged
 from .structures import Course, Week, ProblemSet, Problem, SubmissionSet, Submission
 
 
 class Ingestor[T]:
+    # def __init_subclass__(cls, **kwargs) -> None:
+    #     super().__init_subclass__(**kwargs)
+
+    #     if "__init__" in cls.__dict__:
+    #         cls.__init__ = load_page_logged(cls.__init__)
+    
     def ingest(self) -> T:
         ...
 

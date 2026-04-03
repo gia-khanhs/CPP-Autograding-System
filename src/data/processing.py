@@ -7,14 +7,20 @@ import json
 from .ingestion import CourseIngestor
 from .structures import Course, Week, SubmissionSet, ProblemSet, Problem
 
-from ..misc.oj_problem import get_problem_statement
+from ..llm.oj_problem import get_problem_statement
 from ..misc.pdf_helper import read_bold_text, beautify_text
 from ..misc.debug import logged
 from ..misc.text_helper import remove_space, split_lines, join_lines, find_urls
 from ..llm.problem_classifier import ProblemClassifier
-
+from ..gui.logger_backend import load_page_logged
 
 class Processor[T]:
+    def __init_subclass__(cls, **kwargs) -> None:
+        super().__init_subclass__(**kwargs)
+
+        if "__init__" in cls.__dict__:
+            cls.__init__ = load_page_logged(cls.__init__)
+
     def process(self) -> T:
         ...
 
