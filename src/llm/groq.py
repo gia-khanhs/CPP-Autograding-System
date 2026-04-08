@@ -3,7 +3,6 @@ from config.apikey import GROQ_API_KEY
 from groq import Groq
 
 CODING_MODELS = ["moonshotai/kimi-k2-instruct-0905",
-                 "openai/gpt-oss-120b",
                  "moonshotai/kimi-k2-instruct",
                  ]
 
