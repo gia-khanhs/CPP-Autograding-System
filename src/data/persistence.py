@@ -43,8 +43,9 @@ class SubmissionSaver(Saver[Submission]):
 
             main_folder = main_path.parent
             user_includes = self.submission.script.user_includes
-            for include_raw_path in user_includes:
-                iterim_path = os.path.relpath(include_raw_path, main_folder)
+            for iterim_path in user_includes:
+                # iterim_path = os.path.relpath(include_raw_path, main_folder)
+                include_raw_path = main_folder / iterim_path
                 include_processed_path = save_path / iterim_path
                 include_processed_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy(include_raw_path, include_processed_path)

@@ -3,33 +3,43 @@ from pathlib import Path
 from src.misc.debug import clear_logs
 
 from src.gui.main import app, get_course, get_load_page_logs
+from src.cpp.line_classifier import classify_code_lines
 
 clear_logs()
 
-app.run()
+# app.run()
 
-# data_pipeline = DataPipeline()
-# CS163 = data_pipeline.get()
+from src.cpp.program import Script
 
-# CS163 = CourseIngestor(RAW_DATA_DIR).ingest()
-# CS163 = CourseProcessor(CS163).process()
-# CourseSaver(CS163).save()
+main_path = Path(r"D:\0. APCS\2. Personal Projects\CPP-Autograding-System\data\processed\W2\SubmissionSet\Bài của Bành_Bài của Bành\P25125085\main.cpp")
+test = Script(main_path, True)
+print(test.get_project_dict())
 
-# CS163 = CourseLoader().load()
+# cs163 = get_course()
+# if cs163 is not None:
+#     w01 = cs163.weeks[0]
+#     submission_set01 = w01.submission_set[0]
+#     submission01 = submission_set01.submissions[5]
+#     script_path = submission01.script.file_path
 
-# classifier = ProblemClassifier()
+#     if script_path:
+#         content = None
+#         with open(script_path, "r", encoding="utf-8") as main_file:
+#             content = main_file.read()
+#             main_file.close()
 
-# for id, week in enumerate(CS163.weeks):
-#     print("i" * (id + 1))
-#     # for ssid, submission_set in enumerate(week.submission_set):
-#         # print(submission_set.submissions[0].script)
+#         print(content)
+#         print(classify_code_lines(content))
+# print(classify_code_lines("""
+# #include <bits/stdc++.h>
 
-#     for pid, problem in enumerate(week.problem_set.problems):
-#         title = problem.problem_title
-#         title = "".join(title.split()).lower()
-#         statement = problem.problem_statement
+# using namespace std;
 
-#         print(classifier.classify(f"{title=}\n{statement=}"))
+# int main(){
+#     int n;
+#     cin >> n;
+#     cout << n
 
-# from src.misc.oj_problem import get_problem_statement
-# print(get_problem_statement("https://www.hackerrank.com/challenges/ctci-ice-cream-parlor/problem"))
+#     return 0;
+# }
+# """))

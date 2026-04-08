@@ -1,24 +1,4 @@
-from config.apikey import GROQ_API_KEY
-from .groq import CLASSIFIER_MODELS
-from ..misc.debug import delayed
-from ..gui.logger_backend import load_page_logged
-
-from groq import Groq
-
-
-class ProblemClassifier:
-    client = Groq(api_key=GROQ_API_KEY)
-
-    def __init__(self) -> None:
-        self.model_id = 0
-
-    def try_classify(self, problem_details: str) -> str:
-        chat_completion = self.client.chat.completions.create(
-            model=CLASSIFIER_MODELS[self.model_id],
-            messages=[
-                {
-                    "role": "system",
-                    "content": """
+guide = """
 You are classifying ONE assignment into exactly one label:
 
 - paper
@@ -87,7 +67,30 @@ Return only valid JSON:
 {
   "label": "paper" | "manual_coding" | "online_judge"
 }
-                    """
+"""
+
+from groq import Groq
+
+from config.apikey import GROQ_API_KEY
+from .groq import CLASSIFIER_MODELS
+from ..misc.debug import delayed
+from ..gui.logger_backend import load_page_logged
+
+
+
+class ProblemClassifier:
+    client = Groq(api_key=GROQ_API_KEY)
+
+    def __init__(self) -> None:
+        self.model_id = 0
+
+    def try_classify(self, problem_details: str) -> str:
+        chat_completion = self.client.chat.completions.create(
+            model=CLASSIFIER_MODELS[self.model_id],
+            messages=[
+                {
+                    "role": "system",
+                    "content": guide
                 },
                 {
                     "role": "user",

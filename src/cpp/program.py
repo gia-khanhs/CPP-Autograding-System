@@ -1,6 +1,7 @@
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional, cast
+import subprocess
 
 from clang.cindex import Index
 
@@ -23,12 +24,15 @@ def has_main(cpp_file: Path):
 @dataclass
 class Script:
     file_path: Optional[Path] = None
+    project_root: Optional[Path] = None
     user_includes: list[Path] = field(default_factory=list)
     __cache_file_path: Optional[Path] = None
     __cache_has_main: bool = False
     
     def __init__(self, file_path: Path | None, processing_includes: bool) -> None:
         self.file_path = file_path
+        if self.file_path:
+            self.project_root = self.file_path.parent
         self.user_includes = []
         self.__cache_file_path = None
         self.__cache_has_main = False
@@ -97,7 +101,7 @@ class Script:
             included_path = Path(included.name).resolve()
 
             if self.is_under(project_root, included_path): # not get std libs like iostream and such
-                user_includes.add(included_path)
+                user_includes.add(included_path.relative_to(project_root))
 
         return list(user_includes)
     
@@ -109,3 +113,41 @@ class Script:
         self.user_includes = [include_path
                                 for include_path in folder_path.rglob("*")
                                 if include_path.is_file() and include_path != self.file_path]
+    
+    def try_compile(self) -> bool:
+        if not self.has_main():
+            return False
+        
+        ret = subprocess.run(
+            ['g++', '-fsyntax-only', str(self.file_path)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        ).returncode
+
+        if ret:
+            return False
+        
+        return True
+    
+    def get_project_dict(self) -> dict:
+        if self.file_path is None:
+            return {}
+        if self.project_root is None:
+            self.project_root = self.file_path.parent
+        
+        project = {}
+
+        with open(self.file_path, "r", encoding="utf-8") as main_file:
+            main_script = main_file.read()
+            project["main.cpp"] = main_script
+
+            main_file.close()
+
+        for include_relative_path in self.user_includes:
+            with open(self.project_root / include_relative_path, "r", encoding="utf-8") as include_file:
+                include_script = include_file.read()
+                project[str(include_relative_path)] = include_script
+
+                include_file.close()
+
+        return project
