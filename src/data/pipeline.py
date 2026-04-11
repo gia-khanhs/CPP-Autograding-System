@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from .fingerprints import fingerprint_directory
-from .structures import Course
+from .structures import Course, Week
 from .ingestion import CourseIngestor, WeekIngestor
 from .processing import CourseProcessor, WeekProcessor
 from .persistence import CourseLoader, CourseSaver, WeekSaver
@@ -91,10 +91,15 @@ class DataPipeline:
     @load_page_logged
     def update_weeks(self, course: Course, outdated_week_ids: list[int]) -> Course:
         week_paths = get_subfolders(self.raw_dir)
-
+        
         for week_id in outdated_week_ids:
             raw_week_data = WeekIngestor(week_paths[week_id - 1]).ingest()
-            course.weeks[week_id - 1] = WeekProcessor(raw_week_data).process()
+            processed_week = WeekProcessor(raw_week_data).process()
+            
+            if week_id > len(course.weeks):
+                course.weeks.append(processed_week)
+            else:
+                course.weeks[week_id - 1] = WeekProcessor(raw_week_data).process()
 
             week_name = f"W{week_id}"
             week_path = self.processed_dir / week_name
@@ -117,12 +122,13 @@ class DataPipeline:
     @load_page_logged
     def get(self) -> Course:
         course = CourseLoader().load()
-
+        outdated_weeks = []
         try:
             outdated_weeks = self.get_outdated_week_ids()
-            if len(outdated_weeks):
-                course = self.update_weeks(course, outdated_weeks)
         except:
             course = self.process_full_course()
+
+        if len(outdated_weeks):
+                course = self.update_weeks(course, outdated_weeks)
 
         return course
