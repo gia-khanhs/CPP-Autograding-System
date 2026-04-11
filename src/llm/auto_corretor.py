@@ -101,7 +101,7 @@ class CodeCorrector:
     def swap_model(self) -> None:
         self.model_id = (self.model_id + 1) % len(CODING_MODELS)
 
-    @delayed
+    @delayed(delay_seconds=5)
     @load_page_logged
     def correct(self, problem_details: str, project: dict, max_loops=5) -> dict:
         returned_value = None

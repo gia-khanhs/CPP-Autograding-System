@@ -44,11 +44,27 @@ class DataPipeline:
 
         return saved_hashes
     
+    def get_raw_week_ids(self) -> list[int]:
+        raw_weeks = get_subfolders(self.raw_dir)
+        week_ids = []
+
+        for id in range(len(raw_weeks)):
+            week_name = raw_weeks[id].name
+            week_name = "".join([char
+                         for char in week_name
+                         if char.isdigit()])
+            week_ids.append(int(week_name))
+
+        return week_ids
+
     @load_page_logged
     def get_outdated_week_ids(self) -> list[int]:
         outdated_weeks = []
         saved_hashes = self.get_saved_hashes()
         cur_hashes = self.calc_week_hashes()
+
+        raw_weeks = self.get_raw_week_ids()
+        processed_weeks = []
 
         saved_len = len(saved_hashes)
         cur_len = len(cur_hashes)
@@ -57,24 +73,32 @@ class DataPipeline:
             "and the number of hashes does not match!")
 
         for id, week_name in enumerate(saved_hashes):
+            week_id = "".join([char
+                       for char in week_name
+                       if char.isdigit()])
+            week_id = int(week_id)
+            processed_weeks.append(week_id)
+            
             if saved_hashes.get(week_name) != cur_hashes.get(week_name):
-                outdated_weeks.append(id)
+                outdated_weeks.append(week_id)
 
-        return outdated_weeks
+        not_processed_weeks = [id
+                               for id in raw_weeks
+                               if id not in processed_weeks]
+
+        return outdated_weeks + not_processed_weeks
     
     @load_page_logged
     def update_weeks(self, course: Course, outdated_week_ids: list[int]) -> Course:
-        new_weeks = []
-
         week_paths = get_subfolders(self.raw_dir)
 
         for week_id in outdated_week_ids:
-            raw_week_data = WeekIngestor(week_paths[week_id]).ingest()
-            course.weeks[week_id] = WeekProcessor(raw_week_data).process()
+            raw_week_data = WeekIngestor(week_paths[week_id - 1]).ingest()
+            course.weeks[week_id - 1] = WeekProcessor(raw_week_data).process()
 
-            week_name = f"W{week_id + 1}"
+            week_name = f"W{week_id}"
             week_path = self.processed_dir / week_name
-            WeekSaver(course.weeks[week_id]).save(week_path)
+            WeekSaver(course.weeks[week_id - 1]).save(week_path)
 
         new_hashses = self.calc_week_hashes()
         with open(self.processed_dir / HASH_FILE, "w") as hash_file:

@@ -112,7 +112,7 @@ class ProblemClassifier:
         n_models = len(CLASSIFIER_MODELS)
         self.model_id = (self.model_id + 1) % n_models
 
-    @delayed
+    @delayed()
     @load_page_logged
     def classify(self, problem_details: str, max_loops=5) -> str:
         returned_value = None

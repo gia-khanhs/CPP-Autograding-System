@@ -6,7 +6,7 @@ from ..gui.logger_backend import load_page_logged
 oss_20b = LLMWebSearcher("groq/compound-mini")
 search_instruction = "You are given an url to an online judger for a coding problem. Do a web search and return only the exact problem statement. Return the original URL if you cannot get the problem statement."
 
-@delayed
+@delayed()
 @load_page_logged
 def get_problem_statement(url: str):
     statement = oss_20b.generate(search_instruction, url)

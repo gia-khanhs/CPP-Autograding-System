@@ -1,10 +1,12 @@
 from datetime import datetime
 import time
+from functools import wraps
 
 from config.paths import LOG_FILE
 
 #region logger
 def logged(function):
+    @wraps(function)
     def wrapper(*args, **kargs):
         returned_value = function(*args, **kargs)
 
@@ -36,6 +38,7 @@ def write_log(text: str) -> None:
 
 #region timer
 def timed(function):
+    @wraps(function)
     def wrapper(*args, **kargs):
         initial_time = time.perf_counter()
         returned_val = function(*args, **kargs)
@@ -53,15 +56,16 @@ def timed(function):
     return wrapper
 #endregion
 
-def delayed(function):
-    def wrapper(*args, **kargs):
-        initial_time = time.perf_counter()
-        returned_val = function(*args, **kargs)
-        
-        while True:
-            if time.perf_counter() - initial_time > 2.5:
-                break
-        
-        return returned_val
-    
-    return wrapper
+def delayed(delay_seconds=2.5):
+    def decorator(function):
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            initial_time = time.perf_counter()
+            returned_val = function(*args, **kwargs)
+            
+            elapsed = time.perf_counter() - initial_time
+            time.sleep(max(0, delay_seconds - elapsed))
+            
+            return returned_val
+        return wrapper
+    return decorator

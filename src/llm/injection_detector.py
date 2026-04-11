@@ -1,9 +1,13 @@
 import os
+
 from groq import Groq
+
 from config.apikey import GROQ_API_KEY
+from ..misc.debug import delayed
 
 client = Groq(api_key=GROQ_API_KEY)
 
+@delayed()
 def detect_injection(prompt: str, threshold: float = 0.7) -> bool:
     chat_completion = client.chat.completions.create(
         messages=[

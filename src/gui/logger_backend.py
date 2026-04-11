@@ -1,4 +1,5 @@
 from typing import Callable, Optional
+from functools import wraps
 
 _load_page_logger: Optional[Callable] = None
 
@@ -11,6 +12,7 @@ def load_page_log(message: str) -> None:
         _load_page_logger(message)
 
 def load_page_logged(function):
+    @wraps(function)
     def wrapper(*args, **kwargs):
         logged_data = f"Started: {function.__qualname__}"
 
