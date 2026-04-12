@@ -75,7 +75,7 @@ from config.apikey import GROQ_API_KEY
 from .groq import CLASSIFIER_MODELS
 from ..misc.debug import delayed
 from ..gui.logger_backend import load_page_logged
-
+from .llm_retry import retry_on_rate_limit
 
 
 class ProblemClassifier:
@@ -84,6 +84,7 @@ class ProblemClassifier:
     def __init__(self) -> None:
         self.model_id = 0
 
+    @retry_on_rate_limit()
     def try_classify(self, problem_details: str) -> str:
         chat_completion = self.client.chat.completions.create(
             model=CLASSIFIER_MODELS[self.model_id],
@@ -112,7 +113,6 @@ class ProblemClassifier:
         n_models = len(CLASSIFIER_MODELS)
         self.model_id = (self.model_id + 1) % n_models
 
-    @delayed()
     @load_page_logged
     def classify(self, problem_details: str, max_loops=5) -> str:
         returned_value = None

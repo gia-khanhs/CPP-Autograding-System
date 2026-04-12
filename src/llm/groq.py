@@ -1,6 +1,8 @@
-from config.apikey import GROQ_API_KEY
-
 from groq import Groq
+
+from config.apikey import GROQ_API_KEY
+from .llm_retry import retry_on_rate_limit
+
 
 CODING_MODELS = ["moonshotai/kimi-k2-instruct-0905",
                  "moonshotai/kimi-k2-instruct",
@@ -15,6 +17,7 @@ class APICaller:
     def __init__(self, model="moonshotai/kimi-k2-instruct-0905") -> None:
         self.model = model
 
+    @retry_on_rate_limit()
     def generate(self, user_prompt: str) -> str:
         chat_completion = APICaller.client.chat.completions.create(
             messages=[
@@ -33,6 +36,7 @@ class APICaller:
 
         return returned_content
     
+    @retry_on_rate_limit()
     def instructed_generate(self, system_prompt: str, user_prompt: str) -> str:
         chat_completion = APICaller.client.chat.completions.create(
             messages=[
@@ -62,6 +66,7 @@ class LLMWebSearcher:
     def __init__(self, model="groq/compound-mini") -> None:
         self.model = model
 
+    @retry_on_rate_limit()
     def generate(self, system_prompt: str, user_prompt: str) -> str:
         chat_completion = LLMWebSearcher.client.chat.completions.create(
             model=self.model,

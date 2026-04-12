@@ -151,3 +151,48 @@ class Script:
                 include_file.close()
 
         return project
+    
+
+class ScriptFromDict:
+    def __init__(self, root: Path, project: dict[str, str]) -> None:
+        self.root = root
+        self.project = project
+        self.main_file: Optional[Path] = None
+
+    def write(self, overwrite: bool=True) -> None:
+        self.root.mkdir(parents=True, exist_ok=True)
+
+        for relative_path, content in self.project.items():
+            file_path = self.root / relative_path
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+
+            if file_path.exists() and not overwrite:
+                continue
+
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(content)
+
+    def get_cpp_files(self) -> list[Path]:
+        return list(self.root.rglob("*.cpp"))
+
+    def detect_main_file(self) -> Optional[Path]:
+        preferred = self.root / "main.cpp"
+        if preferred.is_file():
+            self.main_file = preferred
+            return preferred
+
+        for cpp_file in self.get_cpp_files():
+            if has_main(cpp_file):
+                self.main_file = cpp_file
+                return cpp_file
+
+        self.main_file = None
+        return None
+
+    def load(self, processing_includes: bool=True) -> Script:
+        self.write()
+        main_file = self.detect_main_file()
+        return Script(main_file, processing_includes=processing_includes)
+
+    def get_project_dict(self) -> dict[str, str]:
+        return dict(self.project)

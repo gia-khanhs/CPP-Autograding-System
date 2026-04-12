@@ -41,6 +41,7 @@ from groq import Groq
 from .groq import CODING_MODELS
 from ..misc.debug import delayed
 from ..gui.logger_backend import load_page_logged
+from .llm_retry import retry_on_rate_limit
 from config.apikey import GROQ_API_KEY
 
 class CodeCorrector:
@@ -49,6 +50,7 @@ class CodeCorrector:
     def __init__(self) -> None:
         self.model_id = 1
     
+    @retry_on_rate_limit()
     def instructed_generate(self, system_prompt: str, user_prompt: str) -> str:
         chat_completion = CodeCorrector.client.chat.completions.create(
             messages=[
@@ -72,6 +74,7 @@ class CodeCorrector:
 
         return returned_content
     
+    @retry_on_rate_limit()
     def try_correct(self, problem_details: str, project: dict):
         chat_completion = self.client.chat.completions.create(
             model=CODING_MODELS[self.model_id],
@@ -101,7 +104,6 @@ class CodeCorrector:
     def swap_model(self) -> None:
         self.model_id = (self.model_id + 1) % len(CODING_MODELS)
 
-    @delayed()
     @load_page_logged
     def correct(self, problem_details: str, project: dict, max_loops=5) -> dict:
         returned_value = None
