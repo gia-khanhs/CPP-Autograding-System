@@ -1,10 +1,10 @@
 import time
 import random
+import httpx
 from functools import wraps
 from ..gui.logger_backend import load_page_log
 
 import groq
-
 
 def retry_on_rate_limit(max_retries=5, fallback_wait=2.0, jitter=0.25):
     def decorator(func):
@@ -29,6 +29,11 @@ def retry_on_rate_limit(max_retries=5, fallback_wait=2.0, jitter=0.25):
                         wait = fallback_wait * (2 ** attempt)
 
                     wait += random.uniform(0, jitter)
+                    load_page_log(repr(e))
+
+                    if wait > 300:
+                        raise e
+
                     load_page_log(f"Waiting {round(wait, 2)}s before trying to call the API again!")
                     time.sleep(wait)
 

@@ -4,10 +4,25 @@ from src.misc.debug import clear_logs
 
 from src.gui.main import app, get_course, get_load_page_logs
 from src.cpp.line_classifier import classify_code_lines
+from src.grading.correction import BulkScriptCorrector, WeekCorrector
 
 clear_logs()
 
 app.run()
+
+course = get_course()
+
+if course is not None:
+    week01 = course.weeks[0]
+    WeekCorrector(week01).correct()
+    # p04 = week01.problem_set.problems[4]
+    # corrector = BulkScriptCorrector(p04)
+    # script01 = week01.submission_set[0].submissions[4].script
+    # script02 = week01.submission_set[1].submissions[4].script
+    # to_be_corrected = [script01, script02]
+
+    # corrected = corrector.correct(to_be_corrected)
+    # print(corrected)
 
 r"""
 from src.cpp.program import Script

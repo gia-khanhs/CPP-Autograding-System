@@ -102,13 +102,16 @@ class LoadDataPage(BasePage):
         self.loaded_course = DataPipeline(Path(raw_dir), Path(processed_dir)).get()
 
     def append_log(self, message: str) -> None:
-        now = datetime.now().strftime("%H:%M:%S")
-        line = f"[{now}] {message}\n"
+        try:
+            now = datetime.now().strftime("%H:%M:%S")
+            line = f"[{now}] {message}\n"
 
-        self.log_box.configure(state="normal")
-        self.log_box.insert("end", line)
-        self.log_box.see("end")
-        self.log_box.configure(state="disabled")
+            self.log_box.configure(state="normal")
+            self.log_box.insert("end", line)
+            self.log_box.see("end")
+            self.log_box.configure(state="disabled")
+        except:
+            return
 #endregion
 
 

@@ -36,7 +36,9 @@ Output rules:
 """
 
 import json
+import ast
 from groq import Groq
+import groq
 
 from .groq import CODING_MODELS
 from ..misc.debug import delayed
@@ -48,7 +50,7 @@ class CodeCorrector:
     client = Groq(api_key=GROQ_API_KEY)
 
     def __init__(self) -> None:
-        self.model_id = 1
+        self.model_id = 0
     
     @retry_on_rate_limit()
     def instructed_generate(self, system_prompt: str, user_prompt: str) -> str:
@@ -85,7 +87,7 @@ class CodeCorrector:
                 },
                 {
                     "role": "user",
-                    "content": repr(project),
+                    "content": json.dumps(project),
                 },
             ],
             response_format={"type": "json_object"},
@@ -100,7 +102,7 @@ class CodeCorrector:
             raise LookupError(f"Cannot get the response from {CODING_MODELS[self.model_id]}")
 
         return returned_content
-
+    
     def swap_model(self) -> None:
         self.model_id = (self.model_id + 1) % len(CODING_MODELS)
 
@@ -108,9 +110,19 @@ class CodeCorrector:
     def correct(self, problem_details: str, project: dict, max_loops=5) -> dict:
         returned_value = None
 
-        for _ in range(max_loops):
+        for loop_id in range(max_loops):
             try:
                 returned_value = self.try_correct(problem_details, project)
+                return json.loads(returned_value)
+            except groq.RateLimitError as e:
+                return {"RateLimitError.err": repr(e)}
+            except groq.APIStatusError as e:
+                if loop_id == max_loops - 1:
+                    return {"APIStatusError.err": repr(e)}
+                
+                self.model_id = -1
+                returned_value = self.try_correct(problem_details, project)
+                self.model_id = 1
                 return json.loads(returned_value)
             except Exception as error:
                 print(error)

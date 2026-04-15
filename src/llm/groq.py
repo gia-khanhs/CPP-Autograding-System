@@ -6,7 +6,7 @@ from .llm_retry import retry_on_rate_limit
 
 CODING_MODELS = ["moonshotai/kimi-k2-instruct-0905",
                  "moonshotai/kimi-k2-instruct",
-                 ]
+                 "groq/compound-mini"]
 
 CLASSIFIER_MODELS = ["meta-llama/llama-4-scout-17b-16e-instruct",
                      "llama-3.3-70b-versatile"]

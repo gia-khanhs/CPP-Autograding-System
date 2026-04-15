@@ -91,6 +91,10 @@ class LazyProblem:
     @property
     def problem_statement(self) -> str:
         return self._load().problem_statement
+    
+    @property
+    def type(self) -> str:
+        return self._load().type
             
 @dataclass
 class LazySubmission:
