@@ -5,7 +5,7 @@ from ..gui.main import get_course
 from ..cpp.program import Script, ScriptFromDict
 from ..data.structures import Course, Problem, Week
 
-from config.paths import PROCESSED_DATA_DIR, CORRECTED_CODE
+from config.paths import PROCESSED_DATA_DIR, CORRECTED_CODE_DIR
 
 class ScriptCorrector:
     code_corrector = CodeCorrector()
@@ -13,7 +13,7 @@ class ScriptCorrector:
     def __init__(self, problem_details) -> None:
         self.problem_details = problem_details
 
-    def correct(self, script: Script, no_recorrect: bool = True, proccessed_folder: Path = PROCESSED_DATA_DIR, corrected_folder: Path = CORRECTED_CODE) -> Script:
+    def correct(self, script: Script, no_recorrect: bool = True, proccessed_folder: Path = PROCESSED_DATA_DIR, corrected_folder: Path = CORRECTED_CODE_DIR) -> Script:
         if script.file_path is None:
             return script
         

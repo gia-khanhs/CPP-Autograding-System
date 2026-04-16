@@ -162,6 +162,9 @@ class SubmissionSetLoader(Loader[SubmissionSet]):
         super().__init__(load_path)
 
     def load(self, n_problems: int) -> SubmissionSet:
+        if n_problems == 0:
+            n_problems = 99
+
         submissions = []
         for id in range(n_problems):
             submission_problem_folder = self.load_path / f"P{id + 1}"

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .frontend import App
+from .frontend import App # type: ignore
 from ..data.structures import Course
 
 app = App()

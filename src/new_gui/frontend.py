@@ -9,7 +9,7 @@ ctk.set_default_color_theme("dark-blue")
 
 from config.paths import RAW_DATA_DIR, PROCESSED_DATA_DIR, CORRECTED_CODE_DIR
 from ..data.pipeline import DataPipeline
-from .logger_backend import set_load_page_logger
+from .backend import AppBackend
 
 class Window:
     def __init__(self, title: str, width: int, height: int) -> None:
@@ -48,13 +48,14 @@ class OptionFrame:
 
 
 class BasePage(ctk.CTkFrame):
-    def __init__(self, parent) -> None:
+    def __init__(self, parent, backend: AppBackend) -> None:
         super().__init__(parent)
+        self.backend = backend
 
 #region load page
 class LoadDataPage(BasePage):
-    def __init__(self, parent) -> None:
-        super().__init__(parent)
+    def __init__(self, parent, backend) -> None:
+        super().__init__(parent, backend)
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(7, weight=1)
@@ -86,7 +87,6 @@ class LoadDataPage(BasePage):
         self.log_box.grid(row=7, column=0, padx=20, pady=(0, 10), sticky="nsew")
         self.log_box.configure(state="disabled")
 
-        set_load_page_logger(self.append_log)
 
     def start_load(self) -> None:
         self.load_button.configure(state="disabled")
@@ -97,7 +97,7 @@ class LoadDataPage(BasePage):
         try:
             raw_dir = self.raw_course_path.get()
             processed_dir = self.processed_course_path.get()
-            self.loaded_course = DataPipeline(Path(raw_dir), Path(processed_dir)).get()
+            self.backend.load_data(Path(raw_dir), Path(processed_dir))
         finally:
             self.after(0, lambda: self.load_button.configure(state="normal"))
 
@@ -115,8 +115,8 @@ class LoadDataPage(BasePage):
 
 #region ac page
 class AutocorrectionPage(BasePage):
-    def __init__(self, parent) -> None:
-        super().__init__(parent)
+    def __init__(self, parent, backend) -> None:
+        super().__init__(parent, backend)
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(7, weight=1)
@@ -131,7 +131,7 @@ class AutocorrectionPage(BasePage):
         self.corrected_code_path.grid(row=2, column=0, padx=20, pady=(0, 5), sticky="ew")
         self.corrected_code_path.insert("end", str(CORRECTED_CODE_DIR))
 
-        self.correct_button = ctk.CTkButton(self, text="CORRECT CODE")
+        self.correct_button = ctk.CTkButton(self, text="CORRECT CODE", command=self.start_correct)
         self.correct_button.grid(row=5, column=0, padx=20, pady=5, sticky="ew")
 
         self.log_desc = ctk.CTkLabel(self, text="Logs:")
@@ -150,13 +150,21 @@ class AutocorrectionPage(BasePage):
         self.correct_button.configure(state="normal")
 
     def correct_command(self) -> None:
-        corrected_dir = self.corrected_code_path.get()
+        try:
+            processed_dir = self.backend.processed_dir
+            corrected_dir = self.corrected_code_path.get()
+            self.backend.corrected_dir = Path(corrected_dir)
+
+            print(processed_dir)
+            print(self.backend.corrected_dir)
+        finally:
+            self.after(0, lambda: self.correct_button.configure(state="normal"))
 #endregion
 
 #region grading page
 class GradingPage(BasePage):
-    def __init__(self, parent) -> None:
-        super().__init__(parent)
+    def __init__(self, parent, backend) -> None:
+        super().__init__(parent, backend)
 
         self.grid_columnconfigure(0, weight=1)
 
@@ -176,8 +184,8 @@ class ContentFrame:
 
         self._pages = {}
 
-    def add_page(self, name: str, page_cls) -> None:
-        page = page_cls(self._frame)
+    def add_page(self, name: str, page_cls, backend) -> None:
+        page = page_cls(self._frame, backend)
         page.grid(row=0, column=0, sticky="nsew")
         self._pages[name] = page
 
@@ -189,8 +197,11 @@ class ContentFrame:
         return self._frame
 
 
+from .backend import AppBackend
+
 class App:
     def __init__(self) -> None:
+        self.backend = AppBackend()
         self.window = Window("LLM-AC", 760, 540)
 
         self.window.app.grid_columnconfigure(0, weight=1, minsize=160)
@@ -199,21 +210,9 @@ class App:
 
         self.content = ContentFrame(self.window.app)
 
-        self.content.add_page("load_data", LoadDataPage)
-        self.content.add_page("train", AutocorrectionPage)
-        self.content.add_page("evaluate", GradingPage)
-
-        self.sidebar = OptionFrame(
-            self.window.app,
-            on_option_selected=self.content.show_page
-        )
-
-        self.sidebar.add_option("Load Data", "load_data")
-        self.sidebar.add_option("Autocorrection", "train")
-        self.sidebar.add_option("Grading", "evaluate")
-        self.sidebar.finalize_layout()
-
-        self.content.show_page("load_data")
+        self.content.add_page("load_data", LoadDataPage, self.backend)
+        self.content.add_page("autocorrection", AutocorrectionPage, self.backend)
+        self.content.add_page("grading", GradingPage, self.backend)
 
     def run(self) -> None:
         self.window.show()

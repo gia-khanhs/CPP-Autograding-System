@@ -8,6 +8,11 @@ from src.grading.correction import BulkScriptCorrector, WeekCorrector
 
 clear_logs()
 
+from config.paths import CORRECTED_CODE_DIR
+from src.data.persistence import CourseLoader
+tmp = CourseLoader(CORRECTED_CODE_DIR).load()
+print(tmp.weeks[0].submission_set[0].submissions)
+
 app.run()
 
 course = get_course()

@@ -16,11 +16,11 @@ Path(TEMP_DATA_DIR).mkdir(parents=True, exist_ok=True)
 
 # region output
 OUTPUT_DIR = PROJECT_ROOT / 'output'
-CORRECTED_CODE = OUTPUT_DIR / 'corrected_code'
-GRADE = OUTPUT_DIR / 'scores'
+CORRECTED_CODE_DIR = OUTPUT_DIR / 'corrected_code'
+GRADE_DIR = OUTPUT_DIR / 'scores'
 Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-Path(CORRECTED_CODE).mkdir(parents=True, exist_ok=True)
-Path(GRADE).mkdir(parents=True, exist_ok=True)
+Path(CORRECTED_CODE_DIR).mkdir(parents=True, exist_ok=True)
+Path(GRADE_DIR).mkdir(parents=True, exist_ok=True)
 # endregion
 
 CONFIG_DIR = PROJECT_ROOT / 'config'
