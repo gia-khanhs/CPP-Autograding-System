@@ -10,6 +10,7 @@ from .logger import (
 )
 from ..data.structures import Course
 from ..data.pipeline import DataPipeline
+from ..grading.correction import CourseCorrector
 
 
 class AppBackend:
@@ -22,18 +23,18 @@ class AppBackend:
         self.state._loaded_course = DataPipeline(raw_dir, processed_dir).get()
         return self.state._loaded_course
 
-    @autocorrection_page_logged
     def correct_code(self, corrected_dir: Path) -> None:
         self.state._corrected_dir = corrected_dir
-
-        app_log("autocorrection", f"Processed directory: {self.state._processed_dir}")
-        app_log("autocorrection", f"Corrected directory: {self.state._corrected_dir}")
-
+        
         if self.state._loaded_course is None:
             app_log("autocorrection", "No course data loaded yet.")
             return
+        
 
-        app_log("autocorrection", "Autocorrection has not been implemented yet.")
+        CourseCorrector(self.state._loaded_course,
+                        self.state._processed_dir,
+                        self.state._corrected_dir
+                        ).correct()
 
     @grading_page_logged
     def grade(self) -> None:

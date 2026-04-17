@@ -155,8 +155,6 @@ class AutocorrectionPage(BasePage):
         thread = threading.Thread(target=self.correct_command, daemon=True)
         thread.start()
 
-        self.correct_button.configure(state="normal")
-
     def correct_command(self) -> None:
         try:
             processed_dir = self.backend.processed_dir
