@@ -42,7 +42,7 @@ import groq
 
 from .groq import CODING_MODELS
 from ..misc.debug import delayed
-from ..gui.logger_backend import load_page_logged
+from ..gui.logger import load_page_logged
 from .llm_retry import retry_on_rate_limit
 from config.apikey import GROQ_API_KEY
 

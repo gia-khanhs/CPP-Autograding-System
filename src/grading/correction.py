@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from ..llm.auto_corretor import CodeCorrector
-from ..gui.main import get_course
 from ..cpp.program import Script, ScriptFromDict
 from ..data.structures import Course, Problem, Week
 

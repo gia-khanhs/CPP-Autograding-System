@@ -12,7 +12,7 @@ from ..misc.pdf_helper import read_bold_text, beautify_text
 from ..misc.debug import logged
 from ..misc.text_helper import remove_space, split_lines, join_lines, find_urls
 from ..llm.problem_classifier import ProblemClassifier
-from ..gui.logger_backend import load_page_logged
+from ..gui.logger import load_page_logged
 
 class Processor[T]:
     def __init_subclass__(cls, **kwargs) -> None:

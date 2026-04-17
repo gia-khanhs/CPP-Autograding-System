@@ -9,7 +9,7 @@ from ..misc.pdf_helper import read_pdf
 from ..misc.archive_helper import ArchiveExtractor, get_only_archive
 from ..misc.debug import logged
 from ..cpp.program import Script, has_main
-from ..gui.logger_backend import load_page_logged
+from ..gui.logger import load_page_logged
 from .structures import Course, Week, ProblemSet, Problem, SubmissionSet, Submission
 
 

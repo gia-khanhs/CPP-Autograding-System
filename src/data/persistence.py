@@ -13,7 +13,7 @@ from .consts import PS_FOLDER, SS_FOLDER, MAIN_FILE, HASH_FILE
 from ..misc.path import get_subfolders, get_files_of_type
 from ..misc.debug import timed, logged
 from ..cpp.program import Script
-from ..gui.logger_backend import load_page_logged
+from ..gui.logger import load_page_logged
 from config.paths import PROCESSED_DATA_DIR
 
 
