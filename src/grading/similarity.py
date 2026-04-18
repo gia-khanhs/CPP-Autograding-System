@@ -1,14 +1,6 @@
 from difflib import SequenceMatcher
 from dataclasses import dataclass, field
 
-def src_to_lines(src: str) -> list[str]:
-    lines = src.strip()
-    lines = lines.splitlines()
-    lines = [line
-             for line in lines
-             if line]
-    return lines
-
 
 @dataclass
 class SimilarityResult:
@@ -21,20 +13,15 @@ class LineSimilarityEvaluator:
     def __init__(self) -> None:
         pass
 
-    def eval(self, original_src: str, correct_str: str) -> SimilarityResult:
-        original_lines = src_to_lines(original_src)
-        corrected_lines = src_to_lines(correct_str)
-
+    def eval(self, original_lines: list[str], corrected_lines: list[str]) -> SimilarityResult:
         # preparing the result lists
         original_scores = [0.0] * len(original_lines)
-        print(len(original_lines))
         corrected_scores = [0.0] * len(corrected_lines)
 
         line_matches = SequenceMatcher(None, original_lines, corrected_lines, autojunk=False)
         overall_score = line_matches.ratio()
 
         for tag, i1, i2, j1, j2 in line_matches.get_opcodes():
-            print(tag, i1, i2, j1, j2)
             if tag == "equal":
                 for original_line_id, corrected_line_id in zip(range(i1, i2), range(j1, j2)):
                     original_scores[original_line_id] = 1.0
@@ -70,8 +57,8 @@ class LineSimilarityEvaluator:
                     if corrected_line_id in used_corrected:
                         continue
                     
-                    original_scores[original_line_id] = score
-                    corrected_scores[corrected_line_id] = score
+                    original_scores[original_line_id] = max(0.0, score - 0.2)
+                    corrected_scores[corrected_line_id] = max(0.0, score - 0.2)
                     used_original.add(original_line_id)
                     used_corrected.add(corrected_line_id)
 

@@ -121,12 +121,11 @@ def fine_to_coarse(label: FineLabel):
     return "other"
 
 
-def classify_code_lines(code: str) -> list[str]:
+def classify_code_lines(code_lines: list[str]) -> list[str]:
     # result: dict[int, dict[str, str]] = {}
     result = []
-    lines = code.splitlines()
 
-    for i, line in enumerate(lines, start=1):
+    for i, line in enumerate(code_lines, start=1):
         fine = classify_fine_line(line)
         coarse = fine_to_coarse(fine)
         result.append(coarse)
