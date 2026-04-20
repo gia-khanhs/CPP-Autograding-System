@@ -1,6 +1,4 @@
-guide = """
-*You are a code correction system for university students.
-
+guide = """ *You are a code correction system for university students.
 Goal:
 - Correct the provided C++ project so it satisfies the problem requirements.
 
@@ -40,11 +38,17 @@ import ast
 from groq import Groq
 import groq
 
-from .groq import CODING_MODELS
 from ..misc.debug import delayed
 from ..gui.logger import load_page_logged
 from .llm_retry import retry_on_rate_limit
 from config.apikey import GROQ_API_KEY
+
+CODING_MODELS = ["moonshotai/kimi-k2-instruct-0905",
+                 "moonshotai/kimi-k2-instruct",
+                 "groq/compound-mini"]
+
+CLASSIFIER_MODELS = ["meta-llama/llama-4-scout-17b-16e-instruct",
+                     "llama-3.3-70b-versatile"]
 
 class CodeCorrector:
     client = Groq(api_key=GROQ_API_KEY)
@@ -107,7 +111,7 @@ class CodeCorrector:
         self.model_id = (self.model_id + 1) % len(CODING_MODELS)
 
     @load_page_logged
-    def correct(self, problem_details: str, project: dict, max_loops=5) -> dict:
+    def correct(self, problem_details: str, project: dict, max_loops=2) -> dict:
         returned_value = None
 
         for loop_id in range(max_loops):
@@ -123,7 +127,11 @@ class CodeCorrector:
                 self.model_id = -1
                 returned_value = self.try_correct(problem_details, project)
                 self.model_id = 1
-                return json.loads(returned_value)
+
+                try:
+                    return json.loads(returned_value)
+                except:
+                    return self.correct(problem_details, project)
             except Exception as error:
                 print(error)
                 self.swap_model()

@@ -10,7 +10,7 @@ from .consts import PS_FOLDER, SS_FOLDER, MAIN_FILE, HASH_FILE
 from ..misc.debug import logged, timed
 from ..misc.path import get_subfolders
 from config.paths import RAW_DATA_DIR, PROCESSED_DATA_DIR
-from ..gui.logger import load_page_logged
+from ..gui.logger import load_page_logged, app_log
 
 class DataPipeline:
     def __init__(self, course_raw_dir: Path = RAW_DATA_DIR, course_processed_dir: Path = PROCESSED_DATA_DIR) -> None:
@@ -126,6 +126,7 @@ class DataPipeline:
         try:
             outdated_weeks = self.get_outdated_week_ids()
         except:
+            app_log("load_data", "Preparing to process the whole course!")
             course = self.process_full_course()
 
         if len(outdated_weeks):

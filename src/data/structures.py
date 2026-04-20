@@ -105,7 +105,7 @@ class LazySubmission:
         if self._submission is None:
             folder_path = self.main_file.parent
 
-            script = Script(self.main_file, False)
+            script = Script(self.main_file, True)
             submission = Submission(folder_path, script)
 
             self._submission = submission

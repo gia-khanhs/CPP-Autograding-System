@@ -1,10 +1,9 @@
-# google-genai
+google-genai
 groq
 pymupdf
 pymupdf4llm
 rarfile
 libclang
 # requests
-curl_cffi
-beautifulsoup4
 customtkinter
+pandas

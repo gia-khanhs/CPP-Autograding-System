@@ -15,6 +15,7 @@ def retry_on_rate_limit(max_retries=5, fallback_wait=2.0, jitter=0.25):
                     return func(*args, **kwargs)
 
                 except groq.RateLimitError as e:
+                    print(e)
                     if attempt == max_retries:
                         raise RuntimeError(f"Rate limits exceeded! Retried {max_retries} times without response!")
 
