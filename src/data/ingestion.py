@@ -14,11 +14,11 @@ from .structures import Course, Week, ProblemSet, Problem, SubmissionSet, Submis
 
 
 class Ingestor[T]:
-    def __init_subclass__(cls, **kwargs) -> None:
-        super().__init_subclass__(**kwargs)
+    # def __init_subclass__(cls, **kwargs) -> None:
+    #     super().__init_subclass__(**kwargs)
 
-        if "__init__" in cls.__dict__:
-            cls.__init__ = load_page_logged(cls.__init__)
+    #     if "__init__" in cls.__dict__:
+    #         cls.__init__ = load_page_logged(cls.__init__)
     
     def ingest(self) -> T:
         ...

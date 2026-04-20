@@ -16,6 +16,7 @@ from ..grading.correction import CourseCorrector
 class AppBackend:
     def __init__(self) -> None:
         self.state = AppState()
+        self.code_corrector = None
 
     def load_data(self, raw_dir: Path, processed_dir: Path) -> Course:
         self.state._raw_dir = raw_dir
@@ -31,10 +32,11 @@ class AppBackend:
             return
         
 
-        CourseCorrector(self.state._loaded_course,
+        self.code_corrector = CourseCorrector(self.state._loaded_course,
                         self.state._processed_dir,
                         self.state._corrected_dir
-                        ).correct()
+                        )
+        self.code_corrector.correct()
 
     @grading_page_logged
     def grade(self) -> None:

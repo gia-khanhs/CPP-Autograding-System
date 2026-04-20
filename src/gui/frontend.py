@@ -261,6 +261,7 @@ class App:
     def __init__(self, backend: AppBackend) -> None:
         self.backend = backend
         self.window = Window("LLM-AC", 760, 540)
+        self.window._app.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         self.window.app.grid_columnconfigure(0, weight=1, minsize=160)
         self.window.app.grid_columnconfigure(1, weight=5)
@@ -287,5 +288,7 @@ class App:
     def run(self) -> None:
         self.window.show()
 
-
-
+    def on_closing(self):
+        self.window._app.destroy()
+        if self.backend.code_corrector is not None:
+            self.backend.code_corrector.shutdown()

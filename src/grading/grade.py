@@ -24,7 +24,7 @@ class FileGrader:
             "logic": 3.0,
             "input": 2.0,
             "output": 1.0,
-            "other": 0.1,
+            "other": 0.2,
         }
         self.line_score_weight = 1.0
         self.overall_score_weight = 0.0

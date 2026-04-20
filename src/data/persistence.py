@@ -75,7 +75,7 @@ class ProblemSaver(Saver[Problem]):
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(save_path, "w", encoding="utf-8") as save_file:
-            json.dump(asdict(self.problem), save_file)
+            json.dump(asdict(self.problem), save_file, ensure_ascii=False)
             save_file.close()
 
 

@@ -99,7 +99,7 @@ class DataPipeline:
             if week_id > len(course.weeks):
                 course.weeks.append(processed_week)
             else:
-                course.weeks[week_id - 1] = WeekProcessor(raw_week_data).process()
+                course.weeks[week_id - 1] = processed_week
 
             week_name = f"W{week_id}"
             week_path = self.processed_dir / week_name
