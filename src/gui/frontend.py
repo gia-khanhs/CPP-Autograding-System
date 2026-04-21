@@ -289,6 +289,6 @@ class App:
         self.window.show()
 
     def on_closing(self):
+        # if self.backend.code_corrector is not None:
+        #     self.backend.code_corrector.shutdown()
         self.window._app.destroy()
-        if self.backend.code_corrector is not None:
-            self.backend.code_corrector.shutdown()

@@ -1,4 +1,4 @@
-guide = """ *You are a code correction system for university students.
+guide = """*You are a code correction system for university students.
 Goal:
 - Correct the provided C++ project so it satisfies the problem requirements.
 
@@ -30,111 +30,178 @@ Output rules:
 - Do not include comments unless they already exist in the original code.
 - Do not reformat code.
 - Do not change filenames or dictionary keys.
-- If the project makes no sense at all or its logic is not relevant to the problem, return exactly: INVALID
-"""
+- If the project makes no sense at all or its logic is not relevant to the problem, return the JSON with the keys unchanged, and values being empty"""
 
 import json
-import ast
-from groq import Groq
-import groq
+import time
+import random
+from functools import wraps
 
-from ..misc.debug import delayed
-from ..gui.logger import load_page_logged
-from .llm_retry import retry_on_rate_limit
-from config.apikey import GROQ_API_KEY
+from google import genai
+from google.genai import errors, types
 
-CODING_MODELS = ["moonshotai/kimi-k2-instruct-0905",
-                 "moonshotai/kimi-k2-instruct",
-                 "groq/compound-mini"]
+from config.apikey import GEMINI_API_KEY
+from ..gui.logger import autocorrection_page_logged, app_log
 
-CLASSIFIER_MODELS = ["meta-llama/llama-4-scout-17b-16e-instruct",
-                     "llama-3.3-70b-versatile"]
+
+CODING_MODELS = [
+    # "gemma-4-26b-a4b-it",
+    "gemma-4-31b-it",
+    # "gemini-3.1-flash-lite-preview",
+]
+
+def retry_on_rate_limit(max_retries=6, base_delay=1.0, max_delay=60.0, retry_on=(429, 503)):
+    def decorator(function):
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            delay = base_delay
+
+            attempt = 0
+            loop_limit = max_retries
+            while attempt < loop_limit:
+                try:
+                    return function(*args, **kwargs)
+
+                except errors.APIError as error:
+                    if error.code not in retry_on or attempt == loop_limit:
+                        raise                        
+
+                    sleep_time = min(delay, max_delay)
+                    sleep_time *= random.uniform(0.8, 1.2)
+
+                    print(
+                        f"API error {error.code}. "
+                        f"Retrying in {sleep_time:.2f}s "
+                        f"({attempt + 1}/{loop_limit})"
+                    )
+
+                    time.sleep(sleep_time)
+                    if error.code != 503:
+                        delay *= 2
+                    if error.code == 503:
+                        loop_limit += 1
+
+                attempt += 1
+        return wrapper
+    return decorator
+
+def _extract_json(text: str) -> str:
+    text = text.strip()
+
+    if text.startswith("```"):
+        lines = text.splitlines()
+        if lines:
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+
+    thought_end = text.rfind("<channel|>")
+    if thought_end != -1:
+        text = text[thought_end + len("<channel|>"):].strip()
+
+    first = text.find("{")
+    last = text.rfind("}")
+
+    if first != -1 and last != -1 and first <= last:
+        return text[first:last + 1]
+
+    return text
+
+
+class GoogleAPICaller:
+    
+
+    def __init__(self, model: str = CODING_MODELS[0]) -> None:
+        self.model = model
+        self.client = client = genai.Client(api_key=GEMINI_API_KEY)
+
+    def generate(self, user_prompt: str) -> str:
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=user_prompt,
+        )
+
+        returned_content = response.text
+
+        if returned_content is None:
+            raise LookupError(f"Cannot get the response from {self.model}")
+
+        return returned_content
+
+    def instructed_generate(self, system_prompt: str, user_prompt: str) -> str:
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=user_prompt,
+            config={
+                "system_instruction": system_prompt,
+                "max_output_tokens": 32768,
+            },
+        )
+
+        returned_content = response.text
+
+        if returned_content is None:
+            raise LookupError(f"Cannot get the response from {self.model}")
+
+        return returned_content
+
 
 class CodeCorrector:
-    client = Groq(api_key=GROQ_API_KEY)
-
     def __init__(self) -> None:
         self.model_id = 0
-    
+        self.client = genai.Client(api_key=GEMINI_API_KEY)
+
     @retry_on_rate_limit()
-    def instructed_generate(self, system_prompt: str, user_prompt: str) -> str:
-        chat_completion = CodeCorrector.client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": user_prompt
-                }
-            ],
+    def try_correct(self, problem_details: str, project: dict) -> str:
+        app_log("autocorrection", f"Sending request with {CODING_MODELS[self.model_id]}...")
+        start = time.perf_counter()
+
+        response = self.client.models.generate_content(
             model=CODING_MODELS[self.model_id],
-            max_completion_tokens=8192
+            contents=json.dumps(project, ensure_ascii=False, indent=2),
+            config=types.GenerateContentConfig(
+                system_instruction=guide + "\nProblem details:\n" + problem_details,
+                response_mime_type="application/json",
+                response_json_schema={
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                # thinking_config=types.ThinkingConfig(
+                #     thinking_level=types.ThinkingLevel.LOW,
+                #     include_thoughts=False,
+                # ),
+                temperature=0.1,
+                top_p=1,
+                seed=42,
+                max_output_tokens=32768,
+            ),
         )
 
-        returned_content = chat_completion.choices[0].message.content
+        app_log("autocorrection", f"Response received in {time.perf_counter() - start:.2f}s")
+        returned_content = response.text
 
         if returned_content is None:
             raise LookupError(f"Cannot get the response from {CODING_MODELS[self.model_id]}")
 
         return returned_content
-    
-    @retry_on_rate_limit()
-    def try_correct(self, problem_details: str, project: dict):
-        chat_completion = self.client.chat.completions.create(
-            model=CODING_MODELS[self.model_id],
-            messages=[
-                {
-                    "role": "system",
-                    "content": guide + "\nProblem details:\n" + problem_details
-                },
-                {
-                    "role": "user",
-                    "content": json.dumps(project),
-                },
-            ],
-            response_format={"type": "json_object"},
-            max_tokens=8192,
-            temperature=0.1,
-            top_p=1,
-            seed=42
-        )
-        returned_content = chat_completion.choices[0].message.content
 
-        if returned_content is None:
-            raise LookupError(f"Cannot get the response from {CODING_MODELS[self.model_id]}")
-
-        return returned_content
-    
     def swap_model(self) -> None:
         self.model_id = (self.model_id + 1) % len(CODING_MODELS)
 
-    @load_page_logged
-    def correct(self, problem_details: str, project: dict, max_loops=2) -> dict:
+    @autocorrection_page_logged
+    def correct(self, problem_details: str, project: dict, max_loops: int = 2) -> dict:
         returned_value = None
 
-        for loop_id in range(max_loops):
+        for _ in range(max_loops):
             try:
                 returned_value = self.try_correct(problem_details, project)
-                return json.loads(returned_value)
-            except groq.RateLimitError as e:
-                return {"RateLimitError.err": repr(e)}
-            except groq.APIStatusError as e:
-                if loop_id == max_loops - 1:
-                    return {"APIStatusError.err": repr(e)}
-                
-                self.model_id = -1
-                returned_value = self.try_correct(problem_details, project)
-                self.model_id = 1
-
-                try:
-                    return json.loads(returned_value)
-                except:
-                    return self.correct(problem_details, project)
+                return json.loads(_extract_json(returned_value))
             except Exception as error:
                 print(error)
                 self.swap_model()
 
         returned_value = self.try_correct(problem_details, project)
-        return json.loads(returned_value)
+        return json.loads(_extract_json(returned_value))

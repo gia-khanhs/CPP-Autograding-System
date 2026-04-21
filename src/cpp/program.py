@@ -204,6 +204,7 @@ class ScriptFromDict:
             if file_path.exists() and not overwrite:
                 continue
 
+        
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
                 f.close()

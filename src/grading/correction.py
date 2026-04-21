@@ -1,5 +1,4 @@
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
 
 from ..llm.auto_corrector import CodeCorrector
 from ..cpp.program import Script, ScriptFromDict
@@ -10,6 +9,8 @@ from ..gui.logger import app_log, autocorrection_page_logged
 from config.paths import PROCESSED_DATA_DIR, CORRECTED_CODE_DIR
 
 class ScriptCorrector:
+    code_corrector = CodeCorrector()
+
     def __init__(self, problem_details, processed_folder: Path = PROCESSED_DATA_DIR, corrected_folder: Path = CORRECTED_CODE_DIR) -> None:
         self.processed_folder = processed_folder
         self.corrected_folder = corrected_folder
@@ -30,48 +31,29 @@ class ScriptCorrector:
         app_log("autocorrection", f"Correcting {script.file_path}!")
 
         script_dict = script.get_project_dict()
-        code_corrector = CodeCorrector()
-        corrected_dict = code_corrector.correct(self.problem_details, script_dict)
+        corrected_dict = self.code_corrector.correct(self.problem_details, script_dict)
         corrected_script = ScriptFromDict(script_root, corrected_dict).load()
 
         return corrected_script
     
 class BulkScriptCorrector:
-    def __init__(self, problem: Problem, proccessed_folder: Path = PROCESSED_DATA_DIR, corrected_folder: Path = CORRECTED_CODE_DIR, max_workers: int = 4) -> None:
+    def __init__(self, problem: Problem, proccessed_folder: Path = PROCESSED_DATA_DIR, corrected_folder: Path = CORRECTED_CODE_DIR) -> None:
         self.problem = problem
-        self.max_workers = max_workers
-        self.executor = ThreadPoolExecutor(max_workers=max_workers)
         problem_details = f"{problem.problem_title=}\n{problem.problem_statement=}"
         self.script_corrector = ScriptCorrector(problem_details, proccessed_folder, corrected_folder)
 
     def correct(self, scripts: list[Script]) -> list[Script]:
-        if not scripts:
-            return []
-
-        futures = []
-        for script in scripts:
-            future = self.executor.submit(self.script_corrector.correct, script)
-            futures.append((future, script))
-
         corrected_scripts = []
-        for future, script in futures:
-            try:
-                corrected_script = future.result()
-                corrected_scripts.append(corrected_script)
-            except Exception as e:
-                app_log("autocorrection", f"Worker failed for {script.file_path}: {e}")
-                corrected_scripts.append(script)
+        for script in scripts:
+            corrected_script = self.script_corrector.correct(script)
+            corrected_scripts.append(corrected_script)
 
         return corrected_scripts
-
-    def shutdown(self) -> None:
-        self.executor.shutdown(wait=False, cancel_futures=True)
     
 class WeekCorrector:
-    def __init__(self, week: Week, processed_folder: Path = PROCESSED_DATA_DIR, corrected_folder: Path = CORRECTED_CODE_DIR, max_workers: int = 4) -> None:
+    def __init__(self, week: Week, processed_folder: Path = PROCESSED_DATA_DIR, corrected_folder: Path = CORRECTED_CODE_DIR) -> None:
         self.processed_folder = processed_folder
         self.corrected_folder = corrected_folder
-        self.max_workers = max_workers
         
         self.week = week
         self.problem_correctors: list[BulkScriptCorrector] = []
@@ -82,7 +64,7 @@ class WeekCorrector:
 
     def init_problem_correctors(self) -> None:
         for problem in self.week.problem_set.problems:
-            corrector = BulkScriptCorrector(problem, self.processed_folder, self.corrected_folder, self.max_workers)
+            corrector = BulkScriptCorrector(problem, self.processed_folder, self.corrected_folder)
             self.problem_correctors.append(corrector)
 
     def init_scripts_by_problem(self) -> None:
@@ -108,18 +90,14 @@ class WeekCorrector:
 
         return corrected_week
     
-    def shutdown(self):
-        for problem_corrector in self.problem_correctors:
-            problem_corrector.shutdown()
-    
 class CourseCorrector:
     @autocorrection_page_logged
-    def __init__(self, course: Course, processed_folder: Path = PROCESSED_DATA_DIR, corrected_folder: Path = CORRECTED_CODE_DIR, max_workers: int = 8) -> None:
+    def __init__(self, course: Course, processed_folder: Path = PROCESSED_DATA_DIR, corrected_folder: Path = CORRECTED_CODE_DIR) -> None:
         self.course = course
-        self.week_correctors: list[WeekCorrector] = []
+        self.week_correctors = []
 
         for week_id, week in enumerate(course.weeks):
-            self.week_correctors.append(WeekCorrector(week, processed_folder, corrected_folder, max_workers))
+            self.week_correctors.append(WeekCorrector(week, processed_folder, corrected_folder))
     
     @autocorrection_page_logged
     def correct(self) -> Course:
@@ -128,7 +106,4 @@ class CourseCorrector:
 
         course = CourseLoader(CORRECTED_CODE_DIR).load()
         return course
-    
-    def shutdown(self):
-        for week_corrector in self.week_correctors:
-            week_corrector.shutdown()
+        

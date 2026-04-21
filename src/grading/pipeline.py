@@ -29,7 +29,6 @@ class WeekGrader:
                 rel_path = original_src.file_path.relative_to(processed_course_path)
                 corrected_src = Script(corrected_course_path / rel_path, True)
 
-
                 score = self.project_grader.grade(original_src.get_project_dict(),
                                                 corrected_src.get_project_dict())
                 
