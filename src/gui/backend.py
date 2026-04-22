@@ -80,13 +80,16 @@ class AppBackend:
         self.state.corrected_dir = config.corrected_dir
         self.state.grade_dir = config.grade_dir
 
+        if len(config.selected_week_names) == 0:
+            return BatchRunResult(config, [], [])
+
         self._emit_progress(
             on_progress,
             ProgressUpdate(stage="loading", message="Loading/Processing course data"),
         )
 
         selected_week_ids = []
-        for _, week_name in config.selected_week_names:
+        for week_name in config.selected_week_names:
             week_id = int("".join([char
                                for char in week_name
                                if char.isdigit()]))

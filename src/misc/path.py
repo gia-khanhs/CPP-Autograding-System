@@ -15,6 +15,8 @@ def get_subfolders(parent_dir: Path, excludes: Optional[set[str]] = None) -> lis
                   for folder in parent_dir.iterdir()
                   if folder.is_dir() and folder.name not in excludes]
     
+    subfolders = sorted(subfolders)
+
     return subfolders
 
 

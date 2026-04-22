@@ -159,12 +159,14 @@ class DataPipeline:
 
     @load_page_logged
     def get_with_processed_weeks(self, week_ids: list[int]) -> Course:
-        course = CourseLoader(self.processed_dir).load()
         try:
+            course = CourseLoader(self.processed_dir).load()
             course = self.process_weeks_if_needed(course, week_ids)
         except:
             course = course = CourseIngestor(self.raw_dir).ingest()
             course = self.process_weeks_if_needed(course, week_ids)
+
+        course = CourseLoader(self.processed_dir).load()
 
         old_hashes = self.get_saved_hashes()
         new_hashes = self.calc_week_hashes()

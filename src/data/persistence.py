@@ -237,7 +237,6 @@ class CourseLoader(Loader[Course]):
         week_paths = get_subfolders(self.load_path)
 
         weeks = []
-        max_week_id = 0
         for week_path in week_paths:
             week_id = "".join([char
                                for char in week_path.name

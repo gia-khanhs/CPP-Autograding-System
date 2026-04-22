@@ -69,7 +69,7 @@ class WeekCorrector:
 
     def init_scripts_by_problem(self) -> None:
         for problem_id in range(len(self.problem_correctors)):
-            problem = self.week.problem_set.problems[problem_id]
+            # problem = self.week.problem_set.problems[problem_id]
             # if problem.type == "paper":
             #     self.scripts_by_problem.append([])
             #     continue
@@ -96,7 +96,9 @@ class CourseCorrector:
         self.course = course
         self.week_correctors = []
 
-        for week_id, week in enumerate(course.weeks):
+        for _, week in enumerate(course.weeks):
+            if week is None:
+                raise
             self.week_correctors.append(WeekCorrector(week, processed_folder, corrected_folder))
     
     @autocorrection_page_logged

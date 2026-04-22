@@ -187,6 +187,7 @@ class WeekIngestor(Ingestor[Week]):
         week_name = 'W' + week_id
         if folder_path.name != week_name:
             os.rename(folder_path, folder_path.parent / week_name)
+        folder_path = folder_path.parent / week_name
         self.folder_path = folder_path
 
     def ingest(self) -> Week:
@@ -205,8 +206,16 @@ class CourseIngestor(Ingestor[Course]):
 
         week_paths = get_subfolders(self.folder_path)
         for week_path in week_paths:
+            week_id = "".join([char
+                               for char in week_path.name
+                               if char.isdigit()])
+            week_id = int(week_id)
+
             week = WeekIngestor(folder_path=week_path).ingest()
-            weeks.append(week)
+            
+            while len(weeks) < week_id:
+                weeks.append(None)
+            weeks[week_id - 1] = week
 
         return Course(self.folder_path, weeks)
 
