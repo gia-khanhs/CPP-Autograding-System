@@ -3,6 +3,7 @@ from pathlib import Path
 from .grade import ProjectGrader
 from ..data.structures import Course, Week
 from ..cpp.program import Script
+from ..gui.logger import app_log
 
 import pandas as pd
 
@@ -47,13 +48,15 @@ class WeekGrader:
                 )
 
                 score_table[submitter][problem_id + 1] = score
-                print(f"{submitter} - {problem_id + 1} - {score}")
+                app_log("grading", f"{submitter} - Problem {problem_id + 1}: {score}")
 
         score_df = pd.DataFrame.from_dict(score_table, orient="index")
         score_df.index.name = "submitter"
 
         score_df = score_df.reindex(columns=[problem_id + 1 for problem_id in problems_to_grade])
         score_df.columns = [f"P{col}" for col in score_df.columns]
+
+        app_log("grading", f"Saving scores to {self.score_output_folder / processed_week.folder_path.name}_scores.xlsx")
 
         self.score_output_folder.mkdir(parents=True, exist_ok=True)
         output_path = self.score_output_folder / f"{processed_week.folder_path.name}_scores.xlsx"

@@ -8,7 +8,7 @@ import customtkinter as ctk
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
-from config.paths import RAW_DATA_DIR, PROCESSED_DATA_DIR, CORRECTED_CODE_DIR
+from config.paths import RAW_DATA_DIR, PROCESSED_DATA_DIR, CORRECTED_CODE_DIR, GRADE_DIR
 from ..data.pipeline import DataPipeline
 from .backend import AppBackend
 from .logger import set_log_handler
@@ -223,14 +223,59 @@ class GradingPage(BasePage):
         super().__init__(parent, backend)
 
         self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=0)
+        self.grid_rowconfigure(7, weight=1)
 
-        title = ctk.CTkLabel(self, text="Evaluate", font=("Arial", 24, "bold"))
-        title.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="w")
+        self.title = ctk.CTkLabel(self, text="Autocorrection Module", font=("Arial", 24, "bold"))
+        self.title.grid(row=0, column=0, columnspan=2, padx=20, pady=(20, 10), sticky="w")
 
-        info = ctk.CTkLabel(self, text="View evaluation results here.")
-        info.grid(row=1, column=0, padx=20, pady=10, sticky="w")
+        self.output_folder_desc = ctk.CTkLabel(self, text="The output directory of the corrected code:")
+        self.output_folder_desc.grid(row=1, column=0, columnspan=2, padx=20, pady=(5, 0), sticky="w")
+
+        self.output_folder_path = ctk.CTkEntry(self, state="disabled")
+        self.output_folder_path.grid(row=2, column=0, padx=(20, 10), pady=(0, 5), sticky="ew")
+        self.set_entry_value(self.output_folder_path, str(GRADE_DIR))
+
+        self.grade_browse_button = ctk.CTkButton(
+            self,
+            text="Browse",
+            width=90,
+            command=self.choose_output_folder
+        )
+        self.grade_browse_button.grid(row=2, column=1, padx=(0, 20), pady=(0, 5))
+
+        self.grade_button = ctk.CTkButton(self, text="GRADE", command=self.start_grade)
+        self.grade_button.grid(row=5, column=0, columnspan=2, padx=20, pady=5, sticky="ew")
+
+        self.log_desc = ctk.CTkLabel(self, text="Logs:")
+        self.log_desc.grid(row=6, column=0, columnspan=2, padx=20, pady=(5, 0), sticky="w")
+
+        self.log_box = ctk.CTkTextbox(self, height=230)
+        self.log_box.grid(row=7, column=0, columnspan=2, padx=20, pady=(0, 10), sticky="nsew")
+        self.log_box.configure(state="disabled")
 
         set_log_handler("grading", self.append_log)
+
+    def choose_output_folder(self) -> None:
+        folder = filedialog.askdirectory(initialdir=self.output_folder_path.get() or str(GRADE_DIR))
+        if folder:
+            self.set_entry_value(self.output_folder_path, folder)
+
+    def start_grade(self) -> None:
+        self.grade_button.configure(state="disabled")
+        self.grade_browse_button.configure(state="disabled")
+
+        thread = threading.Thread(target=self.grade_command, daemon=True)
+        thread.start()
+
+    def grade_command(self) -> None:
+        try:
+            output_dir = Path(self.output_folder_path.get())
+            self.backend.output_dir = output_dir
+            self.backend.grade(output_dir)
+        finally:
+            self.after(0, lambda: self.grade_button.configure(state="normal"))
+            self.after(0, lambda: self.grade_browse_button.configure(state="normal"))
 #endregion
 
 class ContentFrame:
@@ -253,9 +298,6 @@ class ContentFrame:
     @property
     def frame(self):
         return self._frame
-
-
-from .backend import AppBackend
 
 class App:
     def __init__(self, backend: AppBackend) -> None:
