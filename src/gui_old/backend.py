@@ -47,8 +47,6 @@ class AppBackend:
         self.course_grader = CourseGrader(score_output_dir)
         self.course_grader.grade(self.state._loaded_course, self.state._corrected_dir)
 
-        
-        
     @property
     def loaded_course(self) -> Optional[Course]:
         return self.state._loaded_course

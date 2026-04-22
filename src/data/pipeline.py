@@ -135,7 +135,7 @@ class DataPipeline:
         return course
     
     # below are helper functions for the backend of the gui, added way way after the pipeline for the whole course was coded
-    def process_week_if_needed(self, course: Course, week_id: int, outdated_weeks: list[int]) -> Course:
+    def process_week_if_needed(self, course: Course, week_id: int, outdated_weeks: list[int]):
         if not week_id in outdated_weeks:
             return course
 
@@ -147,24 +147,20 @@ class DataPipeline:
         week_name = f"W{week_id}"
         week_path = self.processed_dir / week_name
         WeekSaver(processed_week).save(week_path)
-
-        return course
     
-    def process_weeks_if_needed(self, course: Course, week_ids: list[int]) -> Course:
+    def process_weeks_if_needed(self, course: Course, week_ids: list[int]):
         outdated_weeks = self.get_outdated_week_ids()
         for week_id in week_ids:
-            course = self.process_week_if_needed(course, week_id, outdated_weeks)
-
-        return course
+            self.process_week_if_needed(course, week_id, outdated_weeks)
 
     @load_page_logged
     def get_with_processed_weeks(self, week_ids: list[int]) -> Course:
         try:
             course = CourseLoader(self.processed_dir).load()
-            course = self.process_weeks_if_needed(course, week_ids)
+            self.process_weeks_if_needed(course, week_ids)
         except:
-            course = course = CourseIngestor(self.raw_dir).ingest()
-            course = self.process_weeks_if_needed(course, week_ids)
+            course = CourseIngestor(self.raw_dir).ingest()
+            self.process_weeks_if_needed(course, week_ids)
 
         course = CourseLoader(self.processed_dir).load()
 
