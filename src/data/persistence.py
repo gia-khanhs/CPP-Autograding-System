@@ -116,7 +116,8 @@ class CourseSaver(Saver[Course]):
         for id, week in enumerate(self.course.weeks):
             week_name = f"W{id + 1}"
             week_folder = save_path / week_name
-            WeekSaver(week).save(week_folder)
+            if week is not None:
+                WeekSaver(week).save(week_folder)
 
             week_hash = fingerprint_directory(week_folder)
             week_hashes[week_name] = week_hash
@@ -234,10 +235,20 @@ class CourseLoader(Loader[Course]):
 
     def load(self) -> Course:
         week_paths = get_subfolders(self.load_path)
+
         weeks = []
+        max_week_id = 0
         for week_path in week_paths:
+            week_id = "".join([char
+                               for char in week_path.name
+                               if char.isdigit()])
+            week_id = int(week_id)
+
             week = WeekLoader(week_path).load()
-            weeks.append(week)
+            
+            while len(weeks) < week_id:
+                weeks.append(None)
+            weeks[week_id - 1] = week
 
         return Course(self.load_path, weeks)
 #endregion

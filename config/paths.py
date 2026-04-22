@@ -11,7 +11,7 @@ TEMP_DATA_DIR = DATA_DIR  / 'temp'
 Path(RAW_DATA_DIR).mkdir(parents=True, exist_ok=True)
 # Path(ITERIM_DATA_DIR).mkdir(parents=True, exist_ok=True)
 Path(PROCESSED_DATA_DIR).mkdir(parents=True, exist_ok=True)
-Path(TEMP_DATA_DIR).mkdir(parents=True, exist_ok=True)
+# Path(TEMP_DATA_DIR).mkdir(parents=True, exist_ok=True)
 # endregion
 
 # region output

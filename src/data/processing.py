@@ -128,8 +128,11 @@ class CourseProcessor(Processor[Course]):
 
     def process(self) -> Course:
         for id, week in enumerate(self.course.weeks):
-            processed_week = WeekProcessor(week).process()
-            self.course.weeks[id] = processed_week
+            if week is None:
+                self.course.weeks[id] = None
+            else:
+                processed_week = WeekProcessor(week).process()
+                self.course.weeks[id] = processed_week
 
         return self.course
 

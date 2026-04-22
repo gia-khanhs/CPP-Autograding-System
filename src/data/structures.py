@@ -57,7 +57,7 @@ class Week:
 @dataclass
 class Course:
     folder_path: Path
-    weeks: list[Week] = field(default_factory=list)
+    weeks: list[Optional[Week]] = field(default_factory=list)
 
 @dataclass
 class LazyProblem:

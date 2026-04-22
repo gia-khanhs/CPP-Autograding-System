@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Optional, cast
-
+import os
 
 from config.paths import RAW_DATA_DIR, EXTRACTED_SUBMISSION_MASTER_FOLDER
 
@@ -179,6 +179,14 @@ class SubmissionSetIngestor(Ingestor[list[SubmissionSet]]):
 
 class WeekIngestor(Ingestor[Week]):
     def __init__(self, folder_path: Path) -> None:
+        week_id = "".join([char
+                       for char in folder_path.name
+                       if char.isdigit()])
+        week_id = week_id.lstrip('0')
+
+        week_name = 'W' + week_id
+        if folder_path.name != week_name:
+            os.rename(folder_path, folder_path.parent / week_name)
         self.folder_path = folder_path
 
     def ingest(self) -> Week:
@@ -193,7 +201,7 @@ class CourseIngestor(Ingestor[Course]):
         self.folder_path = folder_path
         
     def ingest(self) -> Course:
-        weeks: list[Week] = []
+        weeks: list[Optional[Week]] = []
 
         week_paths = get_subfolders(self.folder_path)
         for week_path in week_paths:

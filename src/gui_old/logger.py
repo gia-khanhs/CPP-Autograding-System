@@ -1,28 +1,22 @@
 from functools import wraps
-from typing import Any, Callable, Optional, TypeVar
+from typing import Callable, Optional, TypeVar, Any
 
 F = TypeVar("F", bound=Callable[..., Any])
 
 _log_handlers: dict[str, Callable[[str], None]] = {}
 
-
-def set_log_handler(channel: str, log_func: Optional[Callable[[str], None]]) -> None:
+def set_log_handler(page_name: str, log_func: Optional[Callable[[str], None]]) -> None:
     if log_func is None:
-        _log_handlers.pop(channel, None)
-        return
+        _log_handlers.pop(page_name, None)
+    else:
+        _log_handlers[page_name] = log_func
 
-    _log_handlers[channel] = log_func
+def app_log(page_name: str, message: str) -> None:
+    log_func = _log_handlers.get(page_name)
+    if log_func is not None:
+        log_func(message)
 
-
-def app_log(channel: str, message: str) -> None:
-    log_func = _log_handlers.get(channel)
-    if log_func is None:
-        return
-
-    log_func(message)
-
-
-def page_logged(channel: str):
+def page_logged(page_name: str):
     def decorator(function: F) -> F:
         @wraps(function)
         def wrapper(*args, **kwargs):
@@ -44,25 +38,25 @@ def page_logged(channel: str):
             if parts:
                 message += " with " + ", ".join(parts)
 
-            app_log(channel, message)
+            app_log(page_name, message)
 
             try:
                 result = function(*args, **kwargs)
-            except Exception as exc:
-                app_log(channel, f"Error in {function.__qualname__}: {exc}")
+
+                finished = f"Finished: {function.__qualname__}"
+                result_str = repr(result)
+                if len(result_str) < 200:
+                    finished += f" => {result_str}"
+
+                app_log(page_name, finished)
+                return result
+            except Exception as e:
+                app_log(page_name, f"Error in {function.__qualname__}: {e}")
                 raise
 
-            finished = f"Finished: {function.__qualname__}"
-            result_str = repr(result)
-            if len(result_str) < 200:
-                finished += f" => {result_str}"
-            app_log(channel, finished)
-            return result
-
-        return wrapper  # type: ignore[return-value]
+        return wrapper  # type: ignore
 
     return decorator
-
 
 load_page_logged = page_logged("load_data")
 autocorrection_page_logged = page_logged("autocorrection")

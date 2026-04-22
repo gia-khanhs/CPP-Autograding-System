@@ -103,7 +103,7 @@ class DataPipeline:
 
             week_name = f"W{week_id}"
             week_path = self.processed_dir / week_name
-            WeekSaver(course.weeks[week_id - 1]).save(week_path)
+            WeekSaver(processed_week).save(week_path)
 
         new_hashses = self.calc_week_hashes()
         with open(self.processed_dir / HASH_FILE, "w") as hash_file:
@@ -121,7 +121,7 @@ class DataPipeline:
 
     @load_page_logged
     def get(self) -> Course:
-        course = CourseLoader().load()
+        course = CourseLoader(self.processed_dir).load()
         outdated_weeks = []
         try:
             outdated_weeks = self.get_outdated_week_ids()
@@ -133,3 +133,49 @@ class DataPipeline:
                 course = self.update_weeks(course, outdated_weeks)
 
         return course
+    
+    # below are helper functions for the backend of the gui, added way way after the pipeline for the whole course was coded
+    def process_week_if_needed(self, course: Course, week_id: int, outdated_weeks: list[int]) -> Course:
+        if not week_id in outdated_weeks:
+            return course
+
+        week_paths = get_subfolders(self.raw_dir)
+        raw_week_data = WeekIngestor(week_paths[week_id - 1]).ingest()
+        processed_week = WeekProcessor(raw_week_data).process()
+        course.weeks[week_id - 1] = processed_week
+
+        week_name = f"W{week_id}"
+        week_path = self.processed_dir / week_name
+        WeekSaver(processed_week).save(week_path)
+
+        return course
+    
+    def process_weeks_if_needed(self, course: Course, week_ids: list[int]) -> Course:
+        outdated_weeks = self.get_outdated_week_ids()
+        for week_id in week_ids:
+            course = self.process_week_if_needed(course, week_id, outdated_weeks)
+
+        return course
+
+    @load_page_logged
+    def get_with_processed_weeks(self, week_ids: list[int]) -> Course:
+        course = CourseLoader(self.processed_dir).load()
+        try:
+            course = self.process_weeks_if_needed(course, week_ids)
+        except:
+            course = course = CourseIngestor(self.raw_dir).ingest()
+            course = self.process_weeks_if_needed(course, week_ids)
+
+        old_hashes = self.get_saved_hashes()
+        new_hashes = self.calc_week_hashes()
+        
+        for week_id in week_ids:
+            week_name = 'W' + str(week_id)
+            old_hashes[week_name] = new_hashes[week_name]
+
+        with open(self.processed_dir / HASH_FILE, "w") as hash_file:
+            json.dump(old_hashes, hash_file)
+            hash_file.close()
+
+        return course
+    
