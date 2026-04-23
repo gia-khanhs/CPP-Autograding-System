@@ -6,6 +6,7 @@ import pandas as pd
 from .logger import app_log
 from .state import AppState, BatchRunResult, FailureItem, ProgressUpdate, RunConfig, WeekResult
 from ..data.pipeline import DataPipeline
+from ..data.persistence import CourseLoader
 from ..data.structures import Course, Week
 from ..grading.correction import CourseCorrector, WeekCorrector
 from ..grading.pipeline import CourseGrader, WeekGrader
@@ -62,13 +63,13 @@ class AppBackend:
                     for week in self.state.loaded_course.weeks
                     if week is not None]
 
-        try:
-            course = DataPipeline(raw_dir, processed_dir).get()
-            return [week.folder_path.name
-                    for week in course.weeks
-                    if week is not None]
-        except Exception:
-            return self.get_available_week_names(raw_dir)
+        # try:
+        #     course = DataPipeline(raw_dir, processed_dir).get()
+        #     return [week.folder_path.name
+        #             for week in course.weeks
+        #             if week is not None]
+        # except Exception:
+        return self.get_available_week_names(raw_dir)
 
     def run_grading_batch(
         self,
@@ -97,6 +98,13 @@ class AppBackend:
 
         course = DataPipeline(config.raw_dir, config.processed_dir).get_with_processed_weeks(selected_week_ids)
         self.state.loaded_course = course
+
+        # rename the weeks after the datapipeline did so for the raw data
+        for i, week_name in enumerate(config.selected_week_names):
+            week_id = int("".join([char
+                               for char in week_name
+                               if char.isdigit()]))
+            config.selected_week_names[i] = 'W' + str(week_id)
 
         selected_weeks = self._select_weeks(course, config.selected_week_names)
         total_weeks = len(selected_weeks)

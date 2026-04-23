@@ -69,8 +69,11 @@ class DataPipeline:
         saved_len = len(saved_hashes)
         cur_len = len(cur_hashes)
         if saved_len != cur_len:
-            raise ValueError("Corrupted processed files! The number of weeks in the processed folder"
-            "and the number of hashes does not match!")
+            outdated = [week_name
+                        for week_name in saved_hashes.keys()
+                        if week_name not in cur_hashes.keys() or cur_hashes[week_name] != saved_hashes[week_name]]
+            # raise ValueError("Corrupted processed files! The number of weeks in the processed folder"
+            # " and the number of hashes does not match!")
 
         for id, week_name in enumerate(saved_hashes):
             week_id = "".join([char

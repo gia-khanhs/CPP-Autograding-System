@@ -1,9 +1,9 @@
-# google-genai
 groq
 pymupdf
 pymupdf4llm
 rarfile
 libclang
-# requests
 customtkinter
 pandas
+# google-genai
+# requests

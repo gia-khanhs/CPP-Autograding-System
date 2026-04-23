@@ -422,6 +422,7 @@ class RunPage(BasePage):
     def finish_run(self, result: BatchRunResult) -> None:
         self._set_running_state(False)
         self.on_finished(result)
+        self.refresh_weeks()
 
     def _set_running_state(self, is_running: bool) -> None:
         self._is_running = is_running
