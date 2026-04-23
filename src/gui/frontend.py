@@ -115,7 +115,7 @@ class BasePage(ctk.CTkFrame):
 
     def format_log_line(self, message: str) -> str:
         now = datetime.now().strftime("%H:%M:%S")
-        return f"[{now}] {message}\n"
+        return f"[{now}] {message}\r\n"
 
     def set_entry_value(self, entry: ctk.CTkEntry, value: str) -> None:
         entry.configure(state="normal")
