@@ -1,0 +1,28 @@
+@startuml classes_misc
+set namespaceSeparator none
+class "ArchiveExtractor" as src.misc.archive_helper.ArchiveExtractor {
+  extractor
+  check_extracted_flag(destination: Path) -> bool
+  create_extrated_flag(destination: Path) -> None
+  delete_extracted_path(destination: Path) -> None
+  extract(destination: Path) -> None
+  extract_if_needed(destination: Path) -> bool
+  get_flag_path(destination: Path) -> Path
+  reinit(archive_path: Path) -> None
+}
+class "ExtractorTool" as src.misc.archive_helper.ExtractorTool {
+  flag_extension : str
+  extract(archive_path: Path, destination: Path) -> None
+}
+class "RarExtractorTool" as src.misc.archive_helper.RarExtractorTool {
+  flag_extension : str
+  check_backend() -> bool
+  extract(archive_path: Path, destination: Path) -> None
+}
+class "ZipExtractorTool" as src.misc.archive_helper.ZipExtractorTool {
+  flag_extension : str
+  extract(archive_path: Path, destination: Path) -> None
+}
+src.misc.archive_helper.RarExtractorTool --|> src.misc.archive_helper.ExtractorTool
+src.misc.archive_helper.ZipExtractorTool --|> src.misc.archive_helper.ExtractorTool
+@enduml

@@ -1,0 +1,23 @@
+@startuml packages_gui
+set namespaceSeparator none
+package "src.gui" as src.gui {
+}
+package "src.gui.backend" as src.gui.backend {
+}
+package "src.gui.frontend" as src.gui.frontend {
+}
+package "src.gui.logger" as src.gui.logger {
+}
+package "src.gui.main" as src.gui.main {
+}
+package "src.gui.state" as src.gui.state {
+}
+src.gui --> src.gui.main
+src.gui.backend --> src.gui.logger
+src.gui.backend --> src.gui.state
+src.gui.frontend --> src.gui.backend
+src.gui.frontend --> src.gui.logger
+src.gui.frontend --> src.gui.state
+src.gui.main --> src.gui.backend
+src.gui.main --> src.gui.frontend
+@enduml

@@ -1,0 +1,27 @@
+@startuml classes_cpp
+set namespaceSeparator none
+class "Script" as src.cpp.program.Script {
+  file_path : Optional[Path]
+  index : Index, NoneType
+  parsed_code : NoneType, TranslationUnit
+  project_root : Optional[Path]
+  user_includes : list[Path]
+  discover_project_files() -> list[Path]
+  get_project_dict() -> dict[str, str]
+  get_user_includes(main_file: Path, project_root: Path, args) -> list[Path]
+  has_main() -> bool
+  is_under(root: Path, path: Path) -> bool
+  prepare_includes() -> None
+  try_compile() -> bool
+}
+class "ScriptFromDict" as src.cpp.program.ScriptFromDict {
+  main_file : NoneType, Optional[Path]
+  project : dict[str, str]
+  root : Path
+  detect_main_file() -> Optional[Path]
+  get_cpp_files() -> list[Path]
+  get_project_dict() -> dict[str, str]
+  load(processing_includes: bool) -> Script
+  write(overwrite: bool) -> None
+}
+@enduml

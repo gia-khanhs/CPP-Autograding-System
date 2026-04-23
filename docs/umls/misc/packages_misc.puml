@@ -1,0 +1,21 @@
+@startuml packages_misc
+set namespaceSeparator none
+package "src.misc" as src.misc {
+}
+package "src.misc.archive_helper" as src.misc.archive_helper {
+}
+package "src.misc.debug" as src.misc.debug {
+}
+package "src.misc.json_parser" as src.misc.json_parser {
+}
+package "src.misc.path" as src.misc.path {
+}
+package "src.misc.pdf_helper" as src.misc.pdf_helper {
+}
+package "src.misc.text_helper" as src.misc.text_helper {
+}
+src.misc.archive_helper --> src.misc.debug
+src.misc.archive_helper --> src.misc.path
+src.misc.pdf_helper --> src.misc.debug
+src.misc.pdf_helper --> src.misc.text_helper
+@enduml

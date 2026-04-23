@@ -1,0 +1,18 @@
+@startuml packages_grading
+set namespaceSeparator none
+package "src.grading" as src.grading {
+}
+package "src.grading.correction" as src.grading.correction {
+}
+package "src.grading.grade" as src.grading.grade {
+}
+package "src.grading.line_classifier" as src.grading.line_classifier {
+}
+package "src.grading.pipeline" as src.grading.pipeline {
+}
+package "src.grading.similarity" as src.grading.similarity {
+}
+src.grading.grade --> src.grading.line_classifier
+src.grading.grade --> src.grading.similarity
+src.grading.pipeline --> src.grading.grade
+@enduml

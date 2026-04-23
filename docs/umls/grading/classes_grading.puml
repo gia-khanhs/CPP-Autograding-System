@@ -1,0 +1,68 @@
+@startuml classes_grading
+set namespaceSeparator none
+class "BulkScriptCorrector" as src.grading.correction.BulkScriptCorrector {
+  problem : Problem
+  script_corrector
+  correct(scripts: list[Script]) -> list[Script]
+}
+class "CourseCorrector" as src.grading.correction.CourseCorrector {
+  course : Course
+  week_correctors : list
+  correct() -> Course
+}
+class "CourseGrader" as src.grading.pipeline.CourseGrader {
+  week_grader
+  grade(processed_course: Course, corrected_course_path: Path)
+}
+class "FileGrader" as src.grading.grade.FileGrader {
+  line_score_weight : float
+  line_weights : dict
+  overall_score_weight : float
+  similarity_evaluator
+  grade(original_src: str, corrected_src: str) -> float
+}
+class "LineSimilarityEvaluator" as src.grading.similarity.LineSimilarityEvaluator {
+  eval(original_lines: list[str], corrected_lines: list[str]) -> SimilarityResult
+}
+class "ProjectGrader" as src.grading.grade.ProjectGrader {
+  file_grader
+  grade(original_project: dict[str, str], corrected_project: dict[str, str]) -> float
+}
+class "ScriptCorrector" as src.grading.correction.ScriptCorrector {
+  code_corrector : CodeCorrector
+  corrected_folder : Path
+  problem_details
+  processed_folder : Path
+  correct(script: Script, no_recorrect: bool) -> Script
+}
+class "SimilarityResult" as src.grading.similarity.SimilarityResult {
+  corrected_line_scores : list[float]
+  original_line_scores : list[float]
+  overall_score : float
+}
+class "WeekCorrector" as src.grading.correction.WeekCorrector {
+  corrected_folder : Path
+  problem_correctors : list[BulkScriptCorrector]
+  processed_folder : Path
+  scripts_by_problem : list[list[Script]]
+  week : Week
+  correct() -> list[list[Script]]
+  init_problem_correctors() -> None
+  init_scripts_by_problem() -> None
+}
+class "WeekGrader" as src.grading.pipeline.WeekGrader {
+  project_grader
+  score_output_folder : Path
+  grade(processed_week: Week, processed_course_path: Path, corrected_course_path: Path) -> pd.DataFrame
+}
+class "WeightedScore" as src.grading.grade.WeightedScore {
+  score : float
+  total_weight : float
+}
+src.grading.correction.WeekCorrector --> src.grading.correction.BulkScriptCorrector : problem_correctors
+src.grading.correction.ScriptCorrector --* src.grading.correction.BulkScriptCorrector : script_corrector
+src.grading.grade.FileGrader --* src.grading.grade.ProjectGrader : file_grader
+src.grading.grade.ProjectGrader --* src.grading.pipeline.WeekGrader : project_grader
+src.grading.pipeline.WeekGrader --* src.grading.pipeline.CourseGrader : week_grader
+src.grading.similarity.LineSimilarityEvaluator --* src.grading.grade.FileGrader : similarity_evaluator
+@enduml

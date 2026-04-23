@@ -1,0 +1,32 @@
+@startuml packages_data
+set namespaceSeparator none
+package "src.data" as src.data {
+}
+package "src.data.consts" as src.data.consts {
+}
+package "src.data.fingerprints" as src.data.fingerprints {
+}
+package "src.data.ingestion" as src.data.ingestion {
+}
+package "src.data.persistence" as src.data.persistence {
+}
+package "src.data.pipeline" as src.data.pipeline {
+}
+package "src.data.processing" as src.data.processing {
+}
+package "src.data.structures" as src.data.structures {
+}
+src.data.ingestion --> src.data.structures
+src.data.persistence --> src.data.consts
+src.data.persistence --> src.data.fingerprints
+src.data.persistence --> src.data.processing
+src.data.persistence --> src.data.structures
+src.data.pipeline --> src.data.consts
+src.data.pipeline --> src.data.fingerprints
+src.data.pipeline --> src.data.ingestion
+src.data.pipeline --> src.data.persistence
+src.data.pipeline --> src.data.processing
+src.data.pipeline --> src.data.structures
+src.data.processing --> src.data.ingestion
+src.data.processing --> src.data.structures
+@enduml

@@ -1,0 +1,36 @@
+@startuml classes_llm
+set namespaceSeparator none
+class "CodeCorrector" as src.llm.auto_corrector.CodeCorrector {
+  client : Groq
+  model_id : int
+  correct(problem_details: str, project: dict, max_loops) -> dict
+  instructed_generate(system_prompt: str, user_prompt: str) -> str
+  swap_model() -> None
+  try_correct(problem_details: str, project: dict)
+}
+class "CodeCorrector" as src.llm.auto_corrector_old.CodeCorrector {
+  client : Client
+  model_id : int
+  correct(problem_details: str, project: dict, max_loops: int) -> dict
+  swap_model() -> None
+  try_correct(problem_details: str, project: dict) -> str
+}
+class "CompoundCaller" as src.llm.oj_problem.CompoundCaller {
+  client : Groq
+  model : str
+  generate(system_prompt: str, user_prompt: str) -> str
+}
+class "GoogleAPICaller" as src.llm.auto_corrector_old.GoogleAPICaller {
+  client : Client
+  model : str
+  generate(user_prompt: str) -> str
+  instructed_generate(system_prompt: str, user_prompt: str) -> str
+}
+class "ProblemClassifier" as src.llm.problem_classifier.ProblemClassifier {
+  client : Groq
+  model_id : int
+  classify(problem_details: str, max_loops) -> str
+  swap_model() -> None
+  try_classify(problem_details: str) -> str
+}
+@enduml

@@ -1,0 +1,21 @@
+@startuml packages_llm
+set namespaceSeparator none
+package "src.llm" as src.llm {
+}
+package "src.llm.auto_corrector" as src.llm.auto_corrector {
+}
+package "src.llm.auto_corrector_old" as src.llm.auto_corrector_old {
+}
+package "src.llm.injection_detector" as src.llm.injection_detector {
+}
+package "src.llm.llm_retry" as src.llm.llm_retry {
+}
+package "src.llm.oj_problem" as src.llm.oj_problem {
+}
+package "src.llm.problem_classifier" as src.llm.problem_classifier {
+}
+src.llm.auto_corrector --> src.llm.llm_retry
+src.llm.injection_detector --> src.llm.llm_retry
+src.llm.oj_problem --> src.llm.llm_retry
+src.llm.problem_classifier --> src.llm.llm_retry
+@enduml

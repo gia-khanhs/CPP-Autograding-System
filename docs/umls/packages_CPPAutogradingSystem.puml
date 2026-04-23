@@ -1,0 +1,111 @@
+@startuml packages_CPPAutogradingSystem
+set namespaceSeparator none
+package "main" as main {
+}
+package "src.cpp" as src.cpp {
+}
+package "src.cpp.program" as src.cpp.program {
+}
+package "src.data" as src.data {
+}
+package "src.data.consts" as src.data.consts {
+}
+package "src.data.fingerprints" as src.data.fingerprints {
+}
+package "src.data.ingestion" as src.data.ingestion {
+}
+package "src.data.persistence" as src.data.persistence {
+}
+package "src.data.pipeline" as src.data.pipeline {
+}
+package "src.data.processing" as src.data.processing {
+}
+package "src.data.structures" as src.data.structures {
+}
+package "src.grading" as src.grading {
+}
+package "src.grading.correction" as src.grading.correction {
+}
+package "src.grading.grade" as src.grading.grade {
+}
+package "src.grading.line_classifier" as src.grading.line_classifier {
+}
+package "src.grading.pipeline" as src.grading.pipeline {
+}
+package "src.grading.similarity" as src.grading.similarity {
+}
+package "src.gui" as src.gui {
+}
+package "src.gui.backend" as src.gui.backend {
+}
+package "src.gui.frontend" as src.gui.frontend {
+}
+package "src.gui.logger" as src.gui.logger {
+}
+package "src.gui.main" as src.gui.main {
+}
+package "src.gui.state" as src.gui.state {
+}
+package "src.llm" as src.llm {
+}
+package "src.llm.auto_corrector" as src.llm.auto_corrector {
+}
+package "src.llm.auto_corrector_old" as src.llm.auto_corrector_old {
+}
+package "src.llm.injection_detector" as src.llm.injection_detector {
+}
+package "src.llm.llm_retry" as src.llm.llm_retry {
+}
+package "src.llm.oj_problem" as src.llm.oj_problem {
+}
+package "src.llm.problem_classifier" as src.llm.problem_classifier {
+}
+package "src.misc" as src.misc {
+}
+package "src.misc.archive_helper" as src.misc.archive_helper {
+}
+package "src.misc.debug" as src.misc.debug {
+}
+package "src.misc.json_parser" as src.misc.json_parser {
+}
+package "src.misc.path" as src.misc.path {
+}
+package "src.misc.pdf_helper" as src.misc.pdf_helper {
+}
+package "src.misc.text_helper" as src.misc.text_helper {
+}
+main --> src.gui.main
+src.data.ingestion --> src.data.structures
+src.data.persistence --> src.data.consts
+src.data.persistence --> src.data.fingerprints
+src.data.persistence --> src.data.processing
+src.data.persistence --> src.data.structures
+src.data.pipeline --> src.data.consts
+src.data.pipeline --> src.data.fingerprints
+src.data.pipeline --> src.data.ingestion
+src.data.pipeline --> src.data.persistence
+src.data.pipeline --> src.data.processing
+src.data.pipeline --> src.data.structures
+src.data.processing --> src.data.ingestion
+src.data.processing --> src.data.structures
+src.data.structures --> src.cpp.program
+src.grading.grade --> src.grading.line_classifier
+src.grading.grade --> src.grading.similarity
+src.grading.pipeline --> src.grading.grade
+src.gui --> main
+src.gui.backend --> src.gui.logger
+src.gui.backend --> src.gui.state
+src.gui.frontend --> src.gui.backend
+src.gui.frontend --> src.gui.logger
+src.gui.frontend --> src.gui.state
+src.gui.main --> src.gui.backend
+src.gui.main --> src.gui.frontend
+src.llm.auto_corrector --> src.llm.llm_retry
+src.llm.injection_detector --> src.llm.llm_retry
+src.llm.oj_problem --> src.llm.llm_retry
+src.llm.problem_classifier --> src.llm.llm_retry
+src.misc.archive_helper --> src.misc.debug
+src.misc.archive_helper --> src.misc.path
+src.misc.pdf_helper --> src.misc.debug
+src.misc.pdf_helper --> src.misc.text_helper
+@enduml

@@ -1,0 +1,7 @@
+@startuml packages_cpp
+set namespaceSeparator none
+package "src.cpp" as src.cpp {
+}
+package "src.cpp.program" as src.cpp.program {
+}
+@enduml

@@ -1,0 +1,200 @@
+@startuml classes_data
+set namespaceSeparator none
+class "Course" as src.data.structures.Course {
+  folder_path : Path
+  weeks : list[Optional[Week]]
+}
+class "CourseIngestor" as src.data.ingestion.CourseIngestor {
+  folder_path : Path
+  ingest() -> Course
+}
+class "CourseLoader" as src.data.persistence.CourseLoader {
+  load() -> Course
+}
+class "CourseProcessor" as src.data.processing.CourseProcessor {
+  course
+  process() -> Course
+}
+class "CourseSaver" as src.data.persistence.CourseSaver {
+  course
+  save(save_path: Path) -> None
+}
+class "DataPipeline" as src.data.pipeline.DataPipeline {
+  processed_dir : Path
+  raw_dir : Path
+  calc_week_hashes() -> dict[str, str]
+  get() -> Course
+  get_outdated_week_ids() -> list[int]
+  get_raw_week_ids() -> list[int]
+  get_saved_hashes() -> dict[str, str]
+  get_with_processed_weeks(week_ids: list[int]) -> Course
+  process_full_course() -> Course
+  process_week_if_needed(course: Course, week_id: int, outdated_weeks: list[int])
+  process_weeks_if_needed(course: Course, week_ids: list[int])
+  update_weeks(course: Course, outdated_week_ids: list[int]) -> Course
+}
+class "Ingestor" as src.data.ingestion.Ingestor {
+  T : NoneType
+  ingest() -> T
+}
+class "LazyProblem" as src.data.structures.LazyProblem {
+  json_path : Path
+  problem_statement : str
+  problem_title : str
+  type : str
+  get_problem_dict()
+}
+class "LazySubmission" as src.data.structures.LazySubmission {
+  folder_path : Path
+  main_file : Path
+  script : Script
+}
+class "Loader" as src.data.persistence.Loader {
+  T : NoneType
+  load_path : Path
+  load() -> T
+}
+class "Problem" as src.data.structures.Problem {
+  problem_statement : str
+  problem_title : str
+  statement : Optional[str]
+  title : Optional[str]
+  type : str
+}
+class "ProblemLoader" as src.data.persistence.ProblemLoader {
+  load() -> LazyProblem
+}
+class "ProblemSaver" as src.data.persistence.ProblemSaver {
+  problem
+  save(save_path: Path) -> None
+}
+class "ProblemSet" as src.data.structures.ProblemSet {
+  pdf_path : Optional[Path]
+  problems : list[Problem]
+  text_content : Optional[str]
+}
+class "ProblemSetIngestor" as src.data.ingestion.ProblemSetIngestor {
+  folder_path : Path
+  get_pdf_path() -> Path
+  ingest() -> ProblemSet
+}
+class "ProblemSetLoader" as src.data.persistence.ProblemSetLoader {
+  load() -> ProblemSet
+}
+class "ProblemSetProcessor" as src.data.processing.ProblemSetProcessor {
+  problem_classifier : ProblemClassifier
+  problem_set
+  get_assignment_titles() -> list[str]
+  get_problem_statements(problem_titles: Optional[list[str]]) -> list[str]
+  process() -> ProblemSet
+}
+class "ProblemSetSaver" as src.data.persistence.ProblemSetSaver {
+  problem_set
+  save(save_path: Path) -> None
+}
+class "Processor" as src.data.processing.Processor {
+  T : NoneType
+  process() -> T
+}
+class "Saver" as src.data.persistence.Saver {
+  T : NoneType
+  save(save_path: Path)
+}
+class "Submission" as src.data.structures.Submission {
+  folder_path : Path
+  script : Script
+}
+class "SubmissionIngestor" as src.data.ingestion.SubmissionIngestor {
+  submission_set
+  find_main_script(folder_path: Path) -> Optional[Path]
+  ingest() -> list[Submission]
+}
+class "SubmissionLoader" as src.data.persistence.SubmissionLoader {
+  main_file
+  load() -> LazySubmission
+}
+class "SubmissionSaver" as src.data.persistence.SubmissionSaver {
+  submission
+  save(save_path: Path) -> None
+}
+class "SubmissionSet" as src.data.structures.SubmissionSet {
+  archive_folder : Optional[Path]
+  folder_path : Path
+  submissions : list[Submission]
+}
+class "SubmissionSetIngestor" as src.data.ingestion.SubmissionSetIngestor {
+  folder_path
+  extract_master_archive() -> bool
+  extract_submission_set_archives() -> list[Path]
+  find_submission_set_folder(extracted_destination: Path, n_problems: int) -> Path
+  get_master_archive() -> Path
+  get_master_folder() -> Path
+  get_submission_set_archive_folders() -> list[Path]
+  get_submission_set_archives() -> list[Path]
+  ingest() -> list[SubmissionSet]
+}
+class "SubmissionSetLoader" as src.data.persistence.SubmissionSetLoader {
+  load(n_problems: int) -> SubmissionSet
+}
+class "SubmissionSetProcessor" as src.data.processing.SubmissionSetProcessor {
+  submission_set : list[SubmissionSet]
+  process() -> list[SubmissionSet]
+}
+class "SubmissionSetSaver" as src.data.persistence.SubmissionSetSaver {
+  submission_set
+  save(save_path: Path) -> None
+}
+class "Week" as src.data.structures.Week {
+  folder_path : Path
+  problem_set
+  submission_set : list[SubmissionSet]
+}
+class "WeekIngestor" as src.data.ingestion.WeekIngestor {
+  folder_path : Path
+  ingest() -> Week
+}
+class "WeekLoader" as src.data.persistence.WeekLoader {
+  load() -> Week
+}
+class "WeekProcessor" as src.data.processing.WeekProcessor {
+  week
+  process() -> Week
+}
+class "WeekSaver" as src.data.persistence.WeekSaver {
+  week
+  save(save_path: Path) -> None
+}
+src.data.ingestion.CourseIngestor --|> src.data.ingestion.Ingestor
+src.data.ingestion.ProblemSetIngestor --|> src.data.ingestion.Ingestor
+src.data.ingestion.SubmissionIngestor --|> src.data.ingestion.Ingestor
+src.data.ingestion.SubmissionSetIngestor --|> src.data.ingestion.Ingestor
+src.data.ingestion.WeekIngestor --|> src.data.ingestion.Ingestor
+src.data.persistence.CourseLoader --|> src.data.persistence.Loader
+src.data.persistence.CourseSaver --|> src.data.persistence.Saver
+src.data.persistence.ProblemLoader --|> src.data.persistence.Loader
+src.data.persistence.ProblemSaver --|> src.data.persistence.Saver
+src.data.persistence.ProblemSetLoader --|> src.data.persistence.Loader
+src.data.persistence.ProblemSetSaver --|> src.data.persistence.Saver
+src.data.persistence.SubmissionLoader --|> src.data.persistence.Loader
+src.data.persistence.SubmissionSaver --|> src.data.persistence.Saver
+src.data.persistence.SubmissionSetLoader --|> src.data.persistence.Loader
+src.data.persistence.SubmissionSetSaver --|> src.data.persistence.Saver
+src.data.persistence.WeekLoader --|> src.data.persistence.Loader
+src.data.persistence.WeekSaver --|> src.data.persistence.Saver
+src.data.processing.CourseProcessor --|> src.data.processing.Processor
+src.data.processing.ProblemSetProcessor --|> src.data.processing.Processor
+src.data.processing.SubmissionSetProcessor --|> src.data.processing.Processor
+src.data.processing.WeekProcessor --|> src.data.processing.Processor
+src.data.structures.Week --> src.data.structures.ProblemSet : problem_set
+src.data.structures.Course --o src.data.persistence.CourseSaver : course
+src.data.structures.Course --o src.data.processing.CourseProcessor : course
+src.data.structures.Problem --o src.data.persistence.ProblemSaver : problem
+src.data.structures.ProblemSet --o src.data.persistence.ProblemSetSaver : problem_set
+src.data.structures.ProblemSet --o src.data.processing.ProblemSetProcessor : problem_set
+src.data.structures.Submission --o src.data.persistence.SubmissionSaver : submission
+src.data.structures.SubmissionSet --o src.data.ingestion.SubmissionIngestor : submission_set
+src.data.structures.SubmissionSet --o src.data.persistence.SubmissionSetSaver : submission_set
+src.data.structures.SubmissionSet --o src.data.processing.SubmissionSetProcessor : submission_set
+src.data.structures.Week --o src.data.persistence.WeekSaver : week
+src.data.structures.Week --o src.data.processing.WeekProcessor : week
+@enduml

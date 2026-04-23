@@ -1,0 +1,186 @@
+@startuml classes_gui
+set namespaceSeparator none
+class "App" as src.gui.frontend.App {
+  backend
+  content
+  failures_page
+  navigation
+  results_page
+  run_page
+  window
+  handle_run_finished(result: BatchRunResult) -> None
+  on_closing() -> None
+  run() -> None
+  show_page(page_name: str) -> None
+}
+class "AppBackend" as src.gui.backend.AppBackend {
+  code_corrector : Optional[CourseCorrector]
+  course_grader : Optional[CourseGrader]
+  state
+  correct_code(corrected_dir: Path) -> None
+  get_available_week_names(raw_dir: Path) -> list[str]
+  get_runnable_week_names(raw_dir: Path, processed_dir: Path) -> list[str]
+  grade(grade_dir: Path) -> None
+  load_data(raw_dir: Path, processed_dir: Path) -> Course
+  run_grading_batch(config: RunConfig, on_progress: Optional[ProgressCallback]) -> BatchRunResult
+}
+class "AppState" as src.gui.state.AppState {
+  corrected_dir : Path
+  grade_dir : Path
+  last_run_result : Optional[BatchRunResult]
+  loaded_course : Optional[Course]
+  processed_dir : Path
+  raw_dir : Path
+}
+class "BasePage" as src.gui.frontend.BasePage {
+  backend
+  choose_directory(current_value: str, fallback: Path) -> str
+  create_path_row(parent, row: int, label_text: str, default_path: Path)
+  format_log_line(message: str) -> str
+  set_entry_value(entry: ctk.CTkEntry, value: str) -> None
+}
+class "BatchRunResult" as src.gui.state.BatchRunResult {
+  config
+  failures : list[FailureItem]
+  week_results : list[WeekResult]
+}
+class "ContentFrame" as src.gui.frontend.ContentFrame {
+  add_page(name: str, page: ctk.CTkFrame) -> None
+  show_page(name: str) -> None
+}
+class "FailureItem" as src.gui.state.FailureItem {
+  path : str
+  problem_label : str
+  reason : str
+  stage : str
+  submitter : str
+  week_name : str
+}
+class "FailuresPage" as src.gui.frontend.FailuresPage {
+  table
+  title : CTkLabel
+  populate(failures: list[FailureItem]) -> None
+}
+class "NavigationFrame" as src.gui.frontend.NavigationFrame {
+  title : CTkLabel
+  add_page(row: int, page_name: str, label: str) -> None
+  set_active(page_name: str) -> None
+}
+class "ProgressUpdate" as src.gui.state.ProgressUpdate {
+  completed_weeks : int
+  failures : int
+  message : str
+  stage : str
+  total_weeks : int
+  week_name : str
+}
+class "ResultsPage" as src.gui.frontend.ResultsPage {
+  average_card : CTkLabel
+  failure_card : CTkLabel
+  open_excel_button : CTkButton
+  open_folder_button : CTkButton
+  result : BatchRunResult | None
+  submission_count_card : CTkLabel
+  summary : CTkFrame
+  table
+  title : CTkLabel
+  toolbar : CTkFrame
+  week_count_card : CTkLabel
+  week_map : dict[str, WeekResult]
+  week_menu : CTkOptionMenu
+  change_week(week_name: str) -> None
+  open_score_folder() -> None
+  open_selected_excel() -> None
+  populate(result: BatchRunResult) -> None
+  show_week(week_name: str) -> None
+}
+class "RunConfig" as src.gui.state.RunConfig {
+  corrected_dir : Path
+  grade_dir : Path
+  processed_dir : Path
+  raw_dir : Path
+  run_autocorrection : bool
+  selected_week_names : list[str]
+}
+class "RunPage" as src.gui.frontend.RunPage {
+  actions : CTkFrame
+  corrected_browse_button : CTkButton
+  corrected_entry : CTkEntry
+  failure_value : CTkLabel
+  form : CTkFrame
+  grade_browse_button : CTkButton
+  grade_entry : CTkEntry
+  header : CTkFrame
+  log_box : ctk.CTkTextbox | None
+  logs_card : CTkFrame
+  logs_title : CTkLabel
+  on_finished
+  options : CTkFrame
+  page_scroll : CTkScrollableFrame
+  processed_browse_button : CTkButton
+  processed_entry : CTkEntry
+  progress_bar : CTkProgressBar
+  progress_card : CTkFrame
+  progress_value : CTkLabel
+  raw_browse_button : CTkButton
+  raw_entry : CTkEntry
+  run_autocorrection_checkbox : CTkCheckBox
+  run_autocorrection_var : BooleanVar
+  start_button : CTkButton
+  status_value : CTkLabel
+  subtitle : CTkLabel
+  title : CTkLabel
+  week_checkboxes : list[ctk.CTkCheckBox]
+  week_checked_vars : list[ctk.BooleanVar]
+  week_label : CTkLabel
+  week_scroll : CTkFrame
+  week_text_vars : list[ctk.StringVar]
+  week_value : CTkLabel
+  week_vars : dict[str, ctk.BooleanVar]
+  append_log(message: str) -> None
+  choose_corrected_folder() -> None
+  choose_grade_folder() -> None
+  choose_processed_folder() -> None
+  choose_raw_folder() -> None
+  clear_logs() -> None
+  finish_run(result: BatchRunResult) -> None
+  handle_progress(update: ProgressUpdate) -> None
+  refresh_weeks() -> None
+  rename_weeks(new_week_names: list[str]) -> None
+  start_run() -> None
+}
+class "TableView" as src.gui.frontend.TableView {
+  h_scroll : Scrollbar
+  tree : Treeview
+  v_scroll : Scrollbar
+  set_table(columns: list[str], rows: list[list[str]]) -> None
+}
+class "WeekResult" as src.gui.state.WeekResult {
+  failures : list[FailureItem]
+  output_path : Path
+  score_df : DataFrame
+  week_name : str
+}
+class "Window" as src.gui.frontend.Window {
+  app : ctk.CTk
+  show() -> None
+}
+src.gui.frontend.FailuresPage --|> src.gui.frontend.BasePage
+src.gui.frontend.ResultsPage --|> src.gui.frontend.BasePage
+src.gui.frontend.RunPage --|> src.gui.frontend.BasePage
+src.gui.state.BatchRunResult --> src.gui.state.RunConfig : config
+src.gui.frontend.ResultsPage --> src.gui.state.WeekResult : week_map
+src.gui.frontend.ContentFrame --* src.gui.frontend.App : content
+src.gui.frontend.FailuresPage --* src.gui.frontend.App : failures_page
+src.gui.frontend.NavigationFrame --* src.gui.frontend.App : navigation
+src.gui.frontend.ResultsPage --* src.gui.frontend.App : results_page
+src.gui.frontend.RunPage --* src.gui.frontend.App : run_page
+src.gui.frontend.TableView --* src.gui.frontend.FailuresPage : table
+src.gui.frontend.TableView --* src.gui.frontend.ResultsPage : table
+src.gui.frontend.Window --* src.gui.frontend.App : window
+src.gui.state.AppState --* src.gui.backend.AppBackend : state
+src.gui.backend.AppBackend --o src.gui.frontend.App : backend
+src.gui.backend.AppBackend --o src.gui.frontend.BasePage : backend
+src.gui.state.BatchRunResult --o src.gui.frontend.ResultsPage : result
+src.gui.state.BatchRunResult --o src.gui.state.AppState : last_run_result
+@enduml
