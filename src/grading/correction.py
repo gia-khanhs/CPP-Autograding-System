@@ -94,7 +94,7 @@ class CourseCorrector:
     @autocorrection_page_logged
     def __init__(self, course: Course, processed_folder: Path = PROCESSED_DATA_DIR, corrected_folder: Path = CORRECTED_CODE_DIR) -> None:
         self.course = course
-        self.week_correctors = []
+        self.week_correctors: list[WeekCorrector] = []
 
         for _, week in enumerate(course.weeks):
             if week is None:

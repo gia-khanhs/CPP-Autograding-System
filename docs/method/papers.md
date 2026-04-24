@@ -9,7 +9,7 @@ date: 2026-03-07
 **Date:** March 7, 2026
 
 ## Important Notes
-For the upcoming project on the automated grading of coding assignments, **GPT-oss 120B** (accessed via the Google AI Studio API) will be used as the main LLM. Based on practical availability and cost constraints, this model appears to be the most suitable option for the project.
+For the upcoming project on the automated grading of coding assignments, **GPT-oss 120B** (accessed via the API from Groq) will be used as the main LLM. Based on practical availability and cost constraints, this model appears to be the most suitable option for the project.
 
 
 ## Contents

@@ -7,7 +7,7 @@ class "BulkScriptCorrector" as src.grading.correction.BulkScriptCorrector {
 }
 class "CourseCorrector" as src.grading.correction.CourseCorrector {
   course : Course
-  week_correctors : list
+  week_correctors : list[WeekCorrector]
   correct() -> Course
 }
 class "CourseGrader" as src.grading.pipeline.CourseGrader {
@@ -60,6 +60,7 @@ class "WeightedScore" as src.grading.grade.WeightedScore {
   total_weight : float
 }
 src.grading.correction.WeekCorrector --> src.grading.correction.BulkScriptCorrector : problem_correctors
+src.grading.correction.CourseCorrector --> src.grading.correction.WeekCorrector : week_correctors
 src.grading.correction.ScriptCorrector --* src.grading.correction.BulkScriptCorrector : script_corrector
 src.grading.grade.FileGrader --* src.grading.grade.ProjectGrader : file_grader
 src.grading.grade.ProjectGrader --* src.grading.pipeline.WeekGrader : project_grader
