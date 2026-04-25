@@ -47,7 +47,6 @@ search_instruction = "You are given an url to an online judger for a coding prob
 @retry_on_rate_limit()
 @load_page_logged
 def get_problem_statement(url: str):
-    return url
     statement = oss_20b.generate(search_instruction, url)
     return statement
 #endregion
