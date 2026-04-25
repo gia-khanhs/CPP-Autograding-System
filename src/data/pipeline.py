@@ -35,7 +35,8 @@ class DataPipeline:
         hash_path = self.processed_dir / HASH_FILE
 
         if not hash_path.is_file():
-            raise FileExistsError("Cannot find saved hash file!")
+            return saved_hashes
+            # raise FileExistsError("Cannot find saved hash file!")
         
         with open(hash_path, "r") as hash_file:
             file_content = hash_file.read()
@@ -145,7 +146,6 @@ class DataPipeline:
         week_paths = get_subfolders(self.raw_dir)
         raw_week_data = WeekIngestor(week_paths[week_id - 1]).ingest()
         processed_week = WeekProcessor(raw_week_data).process()
-        course.weeks[week_id - 1] = processed_week
 
         week_name = f"W{week_id}"
         week_path = self.processed_dir / week_name
@@ -161,11 +161,11 @@ class DataPipeline:
         try:
             course = CourseLoader(self.processed_dir).load()
             self.process_weeks_if_needed(course, week_ids)
-        except:
+        except Exception as e:
             course = CourseIngestor(self.raw_dir).ingest()
             self.process_weeks_if_needed(course, week_ids)
 
-        course = CourseLoader(self.processed_dir).load()
+        course = CourseLoader(self.processed_dir).load()        
 
         old_hashes = self.get_saved_hashes()
         new_hashes = self.calc_week_hashes()

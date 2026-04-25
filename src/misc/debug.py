@@ -49,8 +49,6 @@ def timed(function):
         now = datetime.now()
         formatted_time = now.strftime("%H:%M:%S")
 
-        print(f"[{formatted_time}] {function.__name__} took {elapsed_time} to run!")
-
         return returned_val
 
     return wrapper

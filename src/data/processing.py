@@ -86,7 +86,9 @@ class ProblemSetProcessor(Processor[ProblemSet]):
 
     def process(self) -> ProblemSet:
         assignment_titles = self.get_assignment_titles()
-        problem_statements = self.get_problem_statements(assignment_titles) 
+        problem_statements = self.get_problem_statements(assignment_titles)
+
+        processed_problems: list[Problem] = []
 
         for title, statement in zip(assignment_titles, problem_statements):
             problem_type = json.loads(self.problem_classifier.classify(
@@ -97,9 +99,9 @@ class ProblemSetProcessor(Processor[ProblemSet]):
                 oj_url = find_urls(statement)[0]
                 statement = get_problem_statement(oj_url)
 
-            problem = Problem(title, statement, problem_type)
-            self.problem_set.problems.append(problem)
+            processed_problems.append(Problem(title, statement, problem_type))
 
+        self.problem_set.problems = processed_problems
         return self.problem_set
 
 

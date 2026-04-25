@@ -70,7 +70,6 @@ class ZipExtractorTool(ExtractorTool):
 
         with zipfile.ZipFile(archive_path, "r") as zip_ref:
             zip_ref.extractall(destination)
-            print(zip_ref.namelist())
 
 
 class ArchiveExtractor:

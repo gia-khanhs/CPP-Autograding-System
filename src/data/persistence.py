@@ -68,15 +68,19 @@ class SubmissionSetSaver(Saver[SubmissionSet]):
 
 
 class ProblemSaver(Saver[Problem]):
-    def __init__(self, problem: Problem) -> None:
+    def __init__(self, problem: Problem | LazyProblem) -> None:
         self.problem = problem
 
     def save(self, save_path: Path) -> None:
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
+        if isinstance(self.problem, LazyProblem):
+            problem = self.problem._load()
+        else:
+            problem = self.problem
+
         with open(save_path, "w", encoding="utf-8") as save_file:
-            json.dump(asdict(self.problem), save_file, ensure_ascii=False)
-            save_file.close()
+            json.dump(asdict(problem), save_file, ensure_ascii=False)
 
 
 class ProblemSetSaver(Saver[ProblemSet]):
